@@ -1,0 +1,3 @@
+let x: i32 = 5
+let y = 73.45
+let z = x + y * (x - y)
