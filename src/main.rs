@@ -1,8 +1,11 @@
 pub mod lexer;
 pub mod location;
 pub mod read;
+pub mod tokens;
 
 fn main() {
     let code = read::read_file("code.txt");
-    let tokens = 0;
+
+    let mut lexer = lexer::Lexer::new(code);
+    lexer.lex();
 }

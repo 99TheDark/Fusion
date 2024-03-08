@@ -1,11 +1,14 @@
+use core::fmt;
+
+#[derive(Copy, Clone)]
 pub struct Location {
     pub row: u32,
     pub col: u32,
     pub idx: u32,
 }
 
-impl Location {
-    pub fn to_string(&self) -> String {
-        format!("({}, {}) #{}", self.row, self.col + 1, self.idx)
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {}) #{}", self.row + 1, self.col + 1, self.idx)
     }
 }
