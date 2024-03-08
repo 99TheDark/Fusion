@@ -1,6 +1,6 @@
 use crate::{
     location::Location,
-    tokens::{Token, Type, OPERATORS},
+    tokens::{Token, Type, SYMBOLS},
 };
 
 // Lexer
@@ -8,21 +8,23 @@ pub struct Lexer {
     loc: Location,
     tokens: Vec<Token>,
     source: String,
-    successes: Vec<Token>,
 }
 
 impl Lexer {
     pub fn new(code: String) -> Lexer {
         Lexer {
-            loc: Location {
-                row: 0,
-                col: 0,
-                idx: 0,
-            },
+            loc: Location::empty(),
             tokens: Vec::new(),
             source: code,
-            successes: Vec::new(),
         }
+    }
+
+    fn at(&self) -> String {
+        self.source
+            .chars()
+            .nth(self.loc.idx as usize)
+            .unwrap()
+            .to_string()
     }
 
     fn ahead(&self, count: usize) -> String {
@@ -49,62 +51,49 @@ impl Lexer {
         }
     }
 
-    pub fn token(&self, token_type: Type, value: String) -> Token {
+    fn token(&self, token_type: Type, value: String) -> Token {
         Token::new(self.loc, token_type, value)
     }
 
-    pub fn test(&mut self, patterns: &[&str], success: impl Fn(String) -> Type) -> &mut Lexer {
-        for pattern in patterns {
-            if self.ahead(pattern.len()) == pattern.to_string() {
-                let token_type = success(pattern.to_string());
-                let token = self.token(token_type, pattern.to_string());
-                self.successes.push(token);
-            }
-        }
-        self
-    }
-
-    pub fn succeed(&mut self, user: impl Fn(&mut Lexer, Token)) -> &mut Lexer {
-        if self.successes.len() != 0 {
-            let mut longest = self.successes.get(0).unwrap();
-            for success in &self.successes {
-                if success.size > longest.size {
-                    longest = &success;
+    fn symbol(&mut self) -> (bool, Token) {
+        let mut success = String::new();
+        let mut successful_pattern = Type::EOF;
+        for pattern in SYMBOLS {
+            let sources = pattern.src_strings();
+            for src in sources {
+                if self.ahead(src.len()) == src && src.len() > success.len() {
+                    success = src.to_string();
+                    successful_pattern = pattern.clone();
                 }
             }
-
-            user(self, longest.clone());
         }
 
-        self
-    }
-
-    pub fn fail(&mut self, user: impl Fn(&mut Lexer)) {
-        if self.successes.len() == 0 {
-            self.loc.idx += 1;
-            user(self);
+        if success.len() == 0 {
+            (false, Token::empty())
+        } else {
+            let token = self.token(successful_pattern, success);
+            (true, token)
         }
-
-        self.successes.clear();
     }
 
     pub fn lex(&mut self) -> Vec<Token> {
+        let mut capture = String::new();
         while self.loc.idx < self.source.len() as u32 {
-            self.test(OPERATORS, |s| Type::Operator(s))
-                .test(&["let"], |_| Type::Let)
-                .succeed(|lexer: &mut Lexer, token: Token| {
-                    //    ^^^^^^^^^^^^^^^^^ There has to be a way to get around this...
-                    println!("{}", token.to_string());
-                    lexer.push(token);
-                })
-                .fail(|lexer: &mut Lexer| {
-                    // TODO: Make identifiers longer than 1 character lol
-                    lexer.push(Token::new(
-                        lexer.loc,
-                        Type::Identifier(lexer.ahead(1)),
-                        lexer.ahead(1),
-                    ));
-                });
+            let (is_symbol, symbol) = self.symbol();
+            if !is_symbol {
+                capture += &self.at();
+                self.loc.idx += 1;
+            } else {
+                let size = capture.len();
+                if size != 0 {
+                    let loc = Location::new(self.loc.idx - size as u32, self.loc.row, self.loc.col);
+                    let token = Token::new(loc, Type::Identifier(capture.clone()), capture.clone());
+                    self.tokens.push(token);
+                    capture.clear();
+                }
+
+                self.push(symbol);
+            }
         }
 
         self.tokens.clone()

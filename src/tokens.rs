@@ -11,7 +11,12 @@ pub enum Type {
     Assignment,
     LeftParen,
     RightParen,
-    Operator(String),
+    Addition,
+    Subtraction,
+    Multiplication,
+    Division,
+    Exponentiation,
+    Modulo,
     Let,
     Colon,
     EOF,
@@ -28,7 +33,12 @@ impl fmt::Display for Type {
                 Type::Assignment => "=",
                 Type::LeftParen => "(",
                 Type::RightParen => ")",
-                Type::Operator(o) => o,
+                Type::Addition => "+",
+                Type::Subtraction => "-",
+                Type::Multiplication => "*",
+                Type::Division => "/",
+                Type::Exponentiation => "^",
+                Type::Modulo => "%",
                 Type::Let => "let",
                 Type::Colon => ":",
                 Type::EOF => "end of file",
@@ -41,7 +51,41 @@ impl fmt::Display for Type {
     }
 }
 
-pub const OPERATORS: &[&str] = &["+", "-", "*", "/", "^", "%"];
+impl Type {
+    pub fn src_strings(&self) -> Vec<&str> {
+        let src: &[&str] = match self {
+            Type::Whitespace => &[" ", "\t"],
+            Type::NewLine => &["\n"],
+            Type::Assignment => &["="],
+            Type::LeftParen => &["("],
+            Type::RightParen => &[")"],
+            Type::Addition => &["+"],
+            Type::Subtraction => &["-"],
+            Type::Multiplication => &["*"],
+            Type::Division => &["/"],
+            Type::Exponentiation => &["^"],
+            Type::Modulo => &["%"],
+            Type::Let => &["let"],
+            Type::Colon => &[":"],
+            _ => &[""],
+        };
+        src.to_vec()
+    }
+}
+
+pub const SYMBOLS: &[Type] = &[
+    Type::Whitespace,
+    Type::NewLine,
+    Type::Assignment,
+    Type::LeftParen,
+    Type::RightParen,
+    Type::Addition,
+    Type::Subtraction,
+    Type::Multiplication,
+    Type::Division,
+    Type::Modulo,
+    Type::Colon,
+];
 pub const KEYWORDS: &[Type] = &[Type::Let];
 
 #[derive(Debug, Clone)]
@@ -59,10 +103,18 @@ impl Token {
             size: value.len() as u32,
         }
     }
+
+    pub fn empty() -> Token {
+        Token {
+            loc: Location::empty(),
+            typ: Type::EOF,
+            size: 0,
+        }
+    }
 }
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "'{}' at {}", self.typ, self.loc)
+        write!(f, "{} at {}", self.typ, self.loc)
     }
 }

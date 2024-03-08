@@ -12,3 +12,17 @@ impl fmt::Display for Location {
         write!(f, "({}, {}) #{}", self.row + 1, self.col + 1, self.idx)
     }
 }
+
+impl Location {
+    pub fn new(row: u32, col: u32, idx: u32) -> Location {
+        Location { row, col, idx }
+    }
+
+    pub fn empty() -> Location {
+        Location {
+            row: 0,
+            col: 0,
+            idx: 0,
+        }
+    }
+}
