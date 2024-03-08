@@ -167,7 +167,7 @@ pub const SYMBOLS: &[Type] = &[
     Type::LessThanOrEqual,
     Type::Colon,
 ];
-pub const KEYWORDS: &[Type] = &[Type::Let];
+pub const KEYWORDS: &[Type] = &[Type::Let, Type::If, Type::For, Type::While, Type::Do];
 
 #[derive(Debug, Clone)]
 pub struct Token {
