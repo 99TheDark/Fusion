@@ -82,10 +82,12 @@ impl Lexer {
             let loc = Location::new(self.loc.idx - size as u32, self.loc.row, self.loc.col);
 
             let value = capture.clone();
-            let token = match capture.clone().parse::<f32>() {
-                Ok(num) => Token::new(loc, Type::Number(num), value),
-                Err(_) => Token::new(loc, Type::Identifier(capture.clone()), value),
+            let typ = match capture.clone().parse::<f32>() {
+                Ok(num) => Type::Number(num), // TODO: Ignore inf, -inf, nan, etc
+                Err(_) => Type::Identifier(capture.clone()),
             };
+
+            let token = Token::new(loc, typ, value);
             self.tokens.push(token);
 
             return true;
