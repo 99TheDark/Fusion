@@ -2,10 +2,10 @@ use core::fmt;
 
 use crate::location::Location;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Type {
     Identifier(String),
-    WhiteSpace,
+    Whitespace,
     NewLine,
     Number(f32),
     Assignment,
@@ -19,13 +19,32 @@ pub enum Type {
 
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+        let string = match self {
+            Type::Number(n) => n.to_string(),
+            simple => match simple {
+                Type::Identifier(s) => s,
+                Type::Whitespace => "whitespace",
+                Type::NewLine => "new line",
+                Type::Assignment => "=",
+                Type::LeftParen => "(",
+                Type::RightParen => ")",
+                Type::Operator(o) => o,
+                Type::Let => "let",
+                Type::Colon => ":",
+                Type::EOF => "end of file",
+                _ => "", // This should never be reached
+            }
+            .to_owned(),
+        };
+
+        write!(f, "{}", string)
     }
 }
 
 pub const OPERATORS: &[&str] = &["+", "-", "*", "/", "^", "%"];
 pub const KEYWORDS: &[Type] = &[Type::Let];
 
+#[derive(Debug, Clone)]
 pub struct Token {
     pub loc: Location,
     pub typ: Type,
@@ -44,6 +63,6 @@ impl Token {
 
 impl fmt::Display for Token {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} at {}", self.typ, self.loc)
+        write!(f, "'{}' at {}", self.typ, self.loc)
     }
 }

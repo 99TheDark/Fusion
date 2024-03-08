@@ -1,6 +1,6 @@
 use core::fmt;
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Location {
     pub row: u32,
     pub col: u32,
