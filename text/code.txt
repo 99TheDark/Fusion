@@ -1,1 +1,1 @@
-let +-let/*
+let value: int32 = 5

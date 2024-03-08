@@ -76,6 +76,23 @@ impl Lexer {
         }
     }
 
+    fn push_identifier(&mut self, capture: &String) -> bool {
+        let size = capture.len();
+        if size != 0 {
+            let loc = Location::new(self.loc.idx - size as u32, self.loc.row, self.loc.col);
+
+            let value = capture.clone();
+            let token = match capture.clone().parse::<f32>() {
+                Ok(num) => Token::new(loc, Type::Number(num), value),
+                Err(_) => Token::new(loc, Type::Identifier(capture.clone()), value),
+            };
+            self.tokens.push(token);
+
+            return true;
+        }
+        false
+    }
+
     pub fn lex(&mut self) -> Vec<Token> {
         let mut capture = String::new();
         while self.loc.idx < self.source.len() as u32 {
@@ -84,17 +101,14 @@ impl Lexer {
                 capture += &self.at();
                 self.loc.idx += 1;
             } else {
-                let size = capture.len();
-                if size != 0 {
-                    let loc = Location::new(self.loc.idx - size as u32, self.loc.row, self.loc.col);
-                    let token = Token::new(loc, Type::Identifier(capture.clone()), capture.clone());
-                    self.tokens.push(token);
+                if self.push_identifier(&capture) {
                     capture.clear();
-                }
+                };
 
                 self.push(symbol);
             }
         }
+        self.push_identifier(&capture);
 
         self.tokens.clone()
     }
