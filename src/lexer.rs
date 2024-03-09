@@ -114,4 +114,12 @@ impl Lexer {
 
         self.tokens.clone()
     }
+
+    pub fn filter(&self) -> Vec<Token> {
+        self.tokens
+            .clone()
+            .into_iter()
+            .filter(|tok| !matches!(tok.typ, Type::Whitespace))
+            .collect()
+    }
 }
