@@ -7,7 +7,9 @@ pub enum Type {
     Identifier(String),
     Whitespace,
     NewLine,
+    Module,
     Number(f32),
+    Boolean(bool),
     Assignment,
     LeftParen,
     RightParen,
@@ -40,17 +42,25 @@ pub enum Type {
     For,
     While,
     Do,
+    Function,
+    Class,
+    Public,
+    Private,
+    Inner,
+    Operator,
     EOF,
 }
 
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // TODO: Delete this mess
         let string = match self {
             Type::Number(n) => n.to_string(),
             simple => match simple {
                 Type::Identifier(s) => s,
                 Type::Whitespace => "whitespace",
                 Type::NewLine => "new line",
+                Type::Module => "module",
                 Type::Assignment => "equals sign",
                 Type::LeftParen => "left parenthesis",
                 Type::RightParen => "right parenthesis",
@@ -83,6 +93,12 @@ impl fmt::Display for Type {
                 Type::For => "for",
                 Type::While => "while",
                 Type::Do => "do",
+                Type::Function => "function",
+                Type::Class => "class",
+                Type::Public => "public",
+                Type::Private => "private",
+                Type::Inner => "Inner",
+                Type::Operator => "operator",
                 Type::EOF => "end of file",
                 _ => "", // This should never be reached
             }
@@ -95,42 +111,56 @@ impl fmt::Display for Type {
 
 impl Type {
     pub fn src_strings(&self) -> Vec<&str> {
+        let single;
         let src: &[&str] = match self {
             Type::Whitespace => &[" ", "\t"],
-            Type::NewLine => &["\n"],
-            Type::Assignment => &["="],
-            Type::LeftParen => &["("],
-            Type::RightParen => &[")"],
-            Type::LeftBrace => &["{"],
-            Type::RightBrace => &["}"],
-            Type::LeftBracket => &["["],
-            Type::RightBracket => &["]"],
-            Type::Addition => &["+"],
-            Type::Subtraction => &["-"],
-            Type::Multiplication => &["*"],
-            Type::Division => &["/"],
-            Type::Exponentiation => &["^"],
-            Type::Modulo => &["%"],
-            Type::And => &["&"],
-            Type::Or => &["|"],
-            Type::Nand => &["!&"],
-            Type::Nor => &["!|"],
-            Type::Xand => &["^&"],
-            Type::Xor => &["^|"],
-            Type::Not => &["!"],
-            Type::Equal => &["=="],
-            Type::NotEqual => &["!="],
-            Type::GreaterThan => &[">"],
-            Type::GreaterThanOrEqual => &[">="],
-            Type::LessThan => &["<"],
-            Type::LessThanOrEqual => &["<="],
-            Type::Let => &["let"],
-            Type::Colon => &[":"],
-            Type::If => &["if"],
-            Type::For => &["for"],
-            Type::While => &["while"],
-            Type::Do => &["do"],
-            _ => &[""],
+            Type::Boolean(_) => &["true", "false"],
+            _ => {
+                single = [match self {
+                    Type::NewLine => "\n",
+                    Type::Module => "mod",
+                    Type::Assignment => "=",
+                    Type::LeftParen => "(",
+                    Type::RightParen => ")",
+                    Type::LeftBrace => "{",
+                    Type::RightBrace => "}",
+                    Type::LeftBracket => "[",
+                    Type::RightBracket => "]",
+                    Type::Addition => "+",
+                    Type::Subtraction => "-",
+                    Type::Multiplication => "*",
+                    Type::Division => "/",
+                    Type::Exponentiation => "^",
+                    Type::Modulo => "%",
+                    Type::And => "&",
+                    Type::Or => "|",
+                    Type::Nand => "!&",
+                    Type::Nor => "!|",
+                    Type::Xand => "^&",
+                    Type::Xor => "^|",
+                    Type::Not => "!",
+                    Type::Equal => "==",
+                    Type::NotEqual => "!=",
+                    Type::GreaterThan => ">",
+                    Type::GreaterThanOrEqual => ">=",
+                    Type::LessThan => "<",
+                    Type::LessThanOrEqual => "<=",
+                    Type::Let => "let",
+                    Type::Colon => ":",
+                    Type::If => "if",
+                    Type::For => "for",
+                    Type::While => "while",
+                    Type::Do => "do",
+                    Type::Function => "func",
+                    Type::Class => "class",
+                    Type::Public => "pub",
+                    Type::Private => "pri",
+                    Type::Inner => "inn",
+                    Type::Operator => "operator",
+                    _ => "",
+                }];
+                &single
+            }
         };
         src.to_vec()
     }
@@ -167,7 +197,20 @@ pub const SYMBOLS: &[Type] = &[
     Type::LessThanOrEqual,
     Type::Colon,
 ];
-pub const KEYWORDS: &[Type] = &[Type::Let, Type::If, Type::For, Type::While, Type::Do];
+pub const KEYWORDS: &[Type] = &[
+    Type::Module,
+    Type::Let,
+    Type::If,
+    Type::For,
+    Type::While,
+    Type::Do,
+    Type::Function,
+    Type::Class,
+    Type::Public,
+    Type::Private,
+    Type::Inner,
+    Type::Operator,
+];
 
 #[derive(Debug, Clone)]
 pub struct Token {
