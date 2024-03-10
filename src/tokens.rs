@@ -57,6 +57,7 @@ impl fmt::Display for Type {
         // TODO: Delete this mess
         let string = match self {
             Type::Number(n) => n.to_string(),
+            Type::Boolean(b) => b.to_string(),
             simple => match simple {
                 Type::Identifier(s) => s,
                 Type::Whitespace => "whitespace",
@@ -112,16 +113,17 @@ impl fmt::Display for Type {
 }
 
 impl Type {
-    pub fn src_strings(&self) -> Vec<&str> {
+    pub fn src_strings(&self) -> Vec<String> {
         let single;
         let src: &[&str] = match self {
             Type::Whitespace => &[" ", "\t"],
-            Type::Boolean(_) => &["true", "false"],
             _ => {
                 single = [match self {
                     Type::NewLine => "\n",
                     Type::Semicolon => ";",
                     Type::Module => "mod",
+                    Type::Boolean(true) => "true",
+                    Type::Boolean(false) => "false",
                     Type::Assignment => "=",
                     Type::LeftParen => "(",
                     Type::RightParen => ")",
@@ -165,7 +167,8 @@ impl Type {
                 &single
             }
         };
-        src.to_vec()
+
+        src.to_vec().into_iter().map(|s| s.to_owned()).collect()
     }
 }
 
@@ -201,9 +204,11 @@ pub const SYMBOLS: &[Type] = &[
     Type::LessThanOrEqual,
     Type::Colon,
 ];
+
 pub const KEYWORDS: &[Type] = &[
     Type::Module,
-    // TODO: Fix boolean parsers, add to keywords correctly
+    Type::Boolean(true),
+    Type::Boolean(false),
     Type::Let,
     Type::If,
     Type::For,

@@ -13,5 +13,7 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) {}
+    pub fn parse(&mut self) {
+        println!("{:#?}", self.tokens);
+    }
 }

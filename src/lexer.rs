@@ -1,6 +1,6 @@
 use crate::{
     location::Location,
-    tokens::{Token, Type, SYMBOLS},
+    tokens::{Token, Type, KEYWORDS, SYMBOLS},
 };
 
 // Lexer
@@ -84,7 +84,17 @@ impl Lexer {
             let value = capture.clone();
             let typ = match capture.clone().parse::<f32>() {
                 Ok(num) => Type::Number(num), // TODO: Ignore inf, -inf, nan, etc
-                Err(_) => Type::Identifier(capture.clone()),
+                Err(_) => {
+                    let mut ident_typ = Type::Identifier(capture.clone());
+                    for keyword in KEYWORDS {
+                        if value == keyword.to_string() {
+                            ident_typ = keyword.clone();
+                            break;
+                        }
+                    }
+
+                    ident_typ
+                }
             };
 
             let token = Token::new(loc, typ, value);
