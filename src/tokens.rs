@@ -203,6 +203,7 @@ pub const SYMBOLS: &[Type] = &[
 ];
 pub const KEYWORDS: &[Type] = &[
     Type::Module,
+    // TODO: Fix boolean parsers, add to keywords correctly
     Type::Let,
     Type::If,
     Type::For,

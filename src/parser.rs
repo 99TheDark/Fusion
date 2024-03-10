@@ -1,13 +1,16 @@
-use crate::tokens::Token;
+use crate::tokens::{Token, Type};
 
-pub struct Parser<'a> {
-    tokens: &'a Vec<Token>,
+pub struct Parser {
+    tokens: Vec<Token>,
     idx: usize,
 }
 
-impl<'a> Parser<'a> {
-    pub fn new(tokens: &'a Vec<Token>) -> Parser {
-        Parser { tokens, idx: 0 }
+impl Parser {
+    pub fn new(tokens: &Vec<Token>) -> Parser {
+        Parser {
+            tokens: tokens.clone(),
+            idx: 0,
+        }
     }
 
     pub fn parse(&mut self) {}

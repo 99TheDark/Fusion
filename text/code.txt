@@ -1,6 +1,5 @@
 let value: int32 = 5
-let x = -3.4
-let y = 0 - 5
+let x = -3.4; let y = 0 - 5
 
 if y > x {
     let z = true
