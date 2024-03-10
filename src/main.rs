@@ -14,6 +14,7 @@ fn main() {
     let tokens = lexer.filter();
 
     let mut parser = parser::Parser::new(&tokens);
+    parser.parse();
 
     println!("{:#?}", tokens);
 }

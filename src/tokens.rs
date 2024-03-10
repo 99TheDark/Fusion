@@ -7,6 +7,7 @@ pub enum Type {
     Identifier(String),
     Whitespace,
     NewLine,
+    Semicolon,
     Module,
     Number(f32),
     Boolean(bool),
@@ -60,6 +61,7 @@ impl fmt::Display for Type {
                 Type::Identifier(s) => s,
                 Type::Whitespace => "whitespace",
                 Type::NewLine => "new line",
+                Type::Semicolon => "semicolon",
                 Type::Module => "module",
                 Type::Assignment => "equals sign",
                 Type::LeftParen => "left parenthesis",
@@ -97,7 +99,7 @@ impl fmt::Display for Type {
                 Type::Class => "class",
                 Type::Public => "public",
                 Type::Private => "private",
-                Type::Inner => "Inner",
+                Type::Inner => "inner",
                 Type::Operator => "operator",
                 Type::EOF => "end of file",
                 _ => "", // This should never be reached
@@ -118,6 +120,7 @@ impl Type {
             _ => {
                 single = [match self {
                     Type::NewLine => "\n",
+                    Type::Semicolon => ";",
                     Type::Module => "mod",
                     Type::Assignment => "=",
                     Type::LeftParen => "(",
@@ -169,6 +172,7 @@ impl Type {
 pub const SYMBOLS: &[Type] = &[
     Type::Whitespace,
     Type::NewLine,
+    Type::Semicolon,
     Type::Assignment,
     Type::LeftParen,
     Type::RightParen,
