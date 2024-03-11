@@ -3,7 +3,6 @@ use crate::tokens::Type;
 pub enum Node {
     BinaryOp(BinaryOp),
     UnaryOp(UnaryOp),
-    Condition(Condition),
     IfStmt(IfStmt),
 }
 
@@ -18,13 +17,7 @@ pub struct UnaryOp {
     pub val: Box<Node>,
 }
 
-pub struct Condition {
-    pub comp: Type,
-    pub lhs: Box<Node>,
-    pub rhs: Box<Node>,
-}
-
 pub struct IfStmt {
-    pub cond: Box<Condition>,
+    pub cond: Box<BinaryOp>,
     pub body: Vec<Box<Node>>,
 }
