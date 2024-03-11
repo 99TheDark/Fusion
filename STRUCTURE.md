@@ -10,9 +10,10 @@
 | IfStmt | If, Expr(bool), Scope |
 | WhileLoop | While, Expr(bool), Scope |
 | DoWhileLoop | Do, Scope, While, Expr(bool) |
-| Decl | Let, Identifier, Assignment, Expr |
-| Decl | Let, Identifier, Colon, Identifier, Assignment, Expr |
-| Assign | Identifier, Assignment, Expr |
-| OpAssign | Identifier, Op, Assignment, Expr |
-| Param | Identifier, Colon, Identifier | 
-| Function | Func, LeftParen, List&lt;Param&gt; RightParen, Scope |
+| Decl | Let, Ident, Assignment, Expr |
+| Decl | Let, Ident, Colon, Ident, Assignment, Expr |
+| Assign | Ident, Assignment, Expr |
+| OpAssign | Ident, Op, Assignment, Expr |
+| Param | Ident, Colon, Ident | 
+| Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Scope |
+| Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Colon, List&lt;Ident&gt;, Scope |
