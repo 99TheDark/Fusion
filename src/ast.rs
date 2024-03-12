@@ -8,10 +8,20 @@ pub struct Metadata {
     pub end: Location,
 }
 
+impl Metadata {
+    pub fn new(start: Location, end: Location) -> Metadata {
+        Metadata {
+            start: start.clone(),
+            end: end.clone(),
+        }
+    }
+}
+
 // Statements
 #[derive(Debug)]
 pub enum Stmt {
-    Scope(Scope),
+    Scope(Scope /* Add Metadata here */),
+    Decl(Decl),
     IfStmt(IfStmt),
     WhileLoop(WhileLoop),
     DoWhileLoop(DoWhileLoop),
@@ -19,7 +29,14 @@ pub enum Stmt {
 
 #[derive(Debug)]
 pub struct Scope {
-    pub stmts: Vec<Box<Stmt>>,
+    pub stmts: Vec<Box<Stmt>>, // Statements
+}
+
+#[derive(Debug)]
+pub struct Decl {
+    pub name: Box<Ident>,
+    pub annot: Option<Box<Ident>>,
+    pub val: Box<Expr>,
 }
 
 #[derive(Debug)]
@@ -44,6 +61,7 @@ pub struct DoWhileLoop {
 #[derive(Debug)]
 pub enum Expr {
     Ident(Ident),
+    NumLit(NumLit),
     BinaryOp(BinaryOp),
     UnaryOp(UnaryOp),
 }
@@ -52,6 +70,11 @@ pub enum Expr {
 pub struct Ident {
     pub name: String,
     // TODO: Add ID
+}
+
+#[derive(Debug)]
+pub struct NumLit {
+    pub val: f32,
 }
 
 #[derive(Debug)]

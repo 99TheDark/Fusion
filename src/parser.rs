@@ -38,6 +38,7 @@ impl Parser {
         tok
     }
 
+    // Raw parses
     pub fn parse_scope(&mut self) -> ast::Scope {
         self.expect(Type::LeftBrace);
         let mut stmts: Vec<Box<Stmt>> = Vec::new();
@@ -53,10 +54,26 @@ impl Parser {
         ast::Scope { stmts }
     }
 
+    pub fn parse_ident(&mut self) -> ast::Ident {
+        match self.eat().typ {
+            Type::Identifier(name) => ast::Ident { name },
+            _ => panic!("Not an identifier"),
+        }
+    }
+
+    pub fn parse_numlit(&mut self) -> ast::NumLit {
+        match self.eat().typ {
+            Type::Number(val) => ast::NumLit { val },
+            _ => panic!("Not a number"),
+        }
+    }
+
+    // Statements
     pub fn parse_stmt(&mut self) -> Stmt {
         let tok = self.at();
         match tok.typ {
             Type::LeftBrace => self.parse_scope_stmt(),
+            Type::Let => self.parse_decl(),
             Type::If => self.parse_if_stmt(),
             _ => panic!("Not a valid statement: {}", tok.typ),
         }
@@ -71,6 +88,20 @@ impl Parser {
         Stmt::Scope(ast::Scope { stmts })
     }
 
+    pub fn parse_decl(&mut self) -> Stmt {
+        self.eat();
+
+        let ident = self.parse_ident();
+        self.expect(Type::Assignment);
+        let value = self.parse_expr();
+
+        Stmt::Decl(ast::Decl {
+            name: Box::new(ident),
+            annot: None,
+            val: Box::new(value),
+        })
+    }
+
     pub fn parse_if_stmt(&mut self) -> Stmt {
         self.eat();
         let cond = self.parse_expr();
@@ -82,6 +113,7 @@ impl Parser {
         })
     }
 
+    // Expressions
     pub fn parse_expr(&mut self) -> Expr {
         self.parse_comparison()
     }
@@ -103,11 +135,15 @@ impl Parser {
     }
 
     pub fn parse_primary(&mut self) -> Expr {
-        let tok = self.eat();
-        match tok.typ {
-            Type::Identifier(name) => Expr::Ident(ast::Ident { name }),
+        let tok = self.at();
+
+        let expr = match tok.typ {
+            Type::Identifier(_) => Expr::Ident(self.parse_ident()),
+            Type::Number(_) => Expr::NumLit(self.parse_numlit()),
             _ => panic!("Invalid expression"),
-        }
+        };
+
+        expr
     }
 
     pub fn parse(&mut self) {
