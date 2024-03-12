@@ -181,13 +181,19 @@ pub const KEYWORDS: &[Type] = &[
     Type::Operator,
 ];
 
-pub const COMPARISONS: &[Type] = &[
+pub const ORDERED_BINARY_OPERATORS: &[Type] = &[
     Type::Equal,
     Type::NotEqual,
     Type::GreaterThan,
     Type::GreaterThanOrEqual,
     Type::LessThan,
     Type::LessThanOrEqual,
+    Type::Modulo,
+    Type::Exponentiation,
+    Type::Division,
+    Type::Multiplication,
+    Type::Subtraction,
+    Type::Addition,
 ];
 
 #[derive(Debug, Clone)]

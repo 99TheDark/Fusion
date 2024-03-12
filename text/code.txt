@@ -1,5 +1,6 @@
-let x = 0;
+let x = 14
+let y: int = 31
 
 if y > x {
-    
+    let z = y - x
 }

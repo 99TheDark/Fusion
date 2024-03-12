@@ -1,6 +1,6 @@
 # Statement Structure
-|Kind|Components|Status|
-|-|-|:-:|
+| Kind | Components | Status |
+| - | - | :-: |
 | Ident | Identifier | ✓ |
 | NumLit | Number | ✓ |
 | BinaryOp | Expr, Op, Expr | ✓ |
@@ -12,7 +12,7 @@
 | WhileLoop | While, Expr(bool), Scope |
 | DoWhileLoop | Do, Scope, While, Expr(bool) |
 | Decl | Let, Ident, Assignment, Expr | ✓ |
-| Decl | Let, Ident, Colon, Ident, Assignment, Expr |
+| Decl | Let, Ident, Colon, Ident, Assignment, Expr | ✓ |
 | Assign | Ident, Assignment, Expr |
 | OpAssign | Ident, Op, Assignment, Expr |
 | Param | Ident, Colon, Ident | 

@@ -1,5 +1,5 @@
 use crate::ast::{self, Expr, Stmt};
-use crate::tokens::{Token, Type, COMPARISONS};
+use crate::tokens::{Token, Type, ORDERED_BINARY_OPERATORS};
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -50,6 +50,7 @@ impl Parser {
 
             stmts.push(Box::new(self.parse_stmt()));
         }
+        self.expect(Type::RightBrace);
 
         ast::Scope { stmts }
     }
@@ -92,12 +93,20 @@ impl Parser {
         self.eat();
 
         let ident = self.parse_ident();
+
+        let annotation = if self.tt() == Type::Colon {
+            self.eat();
+            Some(Box::new(self.parse_ident()))
+        } else {
+            None
+        };
+
         self.expect(Type::Assignment);
         let value = self.parse_expr();
 
         Stmt::Decl(ast::Decl {
             name: Box::new(ident),
-            annot: None,
+            annot: annotation,
             val: Box::new(value),
         })
     }
@@ -115,20 +124,22 @@ impl Parser {
 
     // Expressions
     pub fn parse_expr(&mut self) -> Expr {
-        self.parse_comparison()
+        self.parse_binop()
     }
 
-    pub fn parse_comparison(&mut self) -> Expr {
+    pub fn parse_binop(&mut self) -> Expr {
         let left = self.parse_primary();
-        if self.tt().is(COMPARISONS) {
-            let comp = self.eat();
-            let right = self.parse_expr();
+        for binop in ORDERED_BINARY_OPERATORS {
+            if self.tt() == *binop {
+                let op = self.eat().typ;
+                let right = self.parse_expr();
 
-            return Expr::BinaryOp(ast::BinaryOp {
-                op: comp.typ,
-                lhs: Box::new(left),
-                rhs: Box::new(right),
-            });
+                return Expr::BinaryOp(ast::BinaryOp {
+                    op,
+                    lhs: Box::new(left),
+                    rhs: Box::new(right),
+                });
+            }
         }
 
         left
@@ -148,6 +159,17 @@ impl Parser {
 
     pub fn parse(&mut self) {
         println!("{}", "-".to_owned().repeat(100));
-        println!("{:#?}", self.parse_stmt());
+
+        let mut stmts: Vec<Stmt> = Vec::new();
+        while self.tt() != Type::EOF {
+            if self.tt().is_line_ending() {
+                self.eat();
+                continue;
+            }
+
+            stmts.push(self.parse_stmt());
+        }
+
+        println!("{:#?}", stmts);
     }
 }
