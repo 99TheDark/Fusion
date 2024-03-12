@@ -18,4 +18,5 @@
 | Param | Ident, Colon, Ident | 
 | Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Scope |
 | Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Colon, List&lt;Ident&gt;, Scope |
+| FuncCall | Ident, LeftParen, List&lt;Expr&gt; RightParen | 
 | Tuple | LeftParen, List&lt;Expr&gt;, RightParen |
