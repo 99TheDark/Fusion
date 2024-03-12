@@ -131,25 +131,28 @@ impl Parser {
 
     // Expressions
     pub fn parse_expr(&mut self) -> Expr {
-        self.parse_binop()
+        self.parse_binop(None)
     }
 
-    pub fn parse_binop(&mut self) -> Expr {
-        let left = self.parse_primary();
-        for binop in ORDERED_BINARY_OPERATORS {
-            if self.tt() == *binop {
+    pub fn parse_binop(&mut self, depth: Option<usize>) -> Expr {
+        let idx = depth.unwrap_or(0);
+        if idx < ORDERED_BINARY_OPERATORS.len() {
+            let mut left = self.parse_binop(Some(idx + 1));
+            while self.tt().is(ORDERED_BINARY_OPERATORS[idx]) {
                 let op = self.eat().typ;
-                let right = self.parse_expr();
+                let right = self.parse_binop(Some(idx + 1));
 
-                return Expr::BinaryOp(ast::BinaryOp {
+                left = Expr::BinaryOp(ast::BinaryOp {
                     op,
                     lhs: Box::new(left),
                     rhs: Box::new(right),
                 });
             }
-        }
 
-        left
+            left
+        } else {
+            self.parse_primary()
+        }
     }
 
     pub fn parse_primary(&mut self) -> Expr {

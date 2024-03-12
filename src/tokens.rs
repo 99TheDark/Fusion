@@ -196,43 +196,34 @@ pub const KEYWORDS: &[Type] = &[
     Type::Operator,
 ];
 
-pub const ORDERED_BINARY_OPERATORS: &[Type] = &[
-    // Logical
-    Type::Xor,
-    Type::Xand,
-    Type::Nor,
-    Type::Nand,
-    Type::Or,
-    Type::And,
-    // Comparison
-    Type::LessThanOrEqual,
-    Type::LessThan,
-    Type::GreaterThanOrEqual,
-    Type::GreaterThan,
-    Type::NotEqual,
-    Type::Equal,
-    // Modulo
-    Type::Modulo,
-    // Bitwise
-    Type::ZeroFillRightShift,
-    Type::RightShift,
-    Type::LeftShift,
-    // Standard
-    Type::Exponentiation,
-    Type::Division,
-    Type::Multiplication,
-    Type::Subtraction,
-    Type::Addition,
+pub const ORDERED_BINARY_OPERATORS: &[&[Type]] = &[
+    &[
+        Type::Xor,
+        Type::Xand,
+        Type::Nor,
+        Type::Nand,
+        Type::Or,
+        Type::And,
+    ],
+    &[
+        Type::LessThanOrEqual,
+        Type::LessThan,
+        Type::GreaterThanOrEqual,
+        Type::GreaterThan,
+        Type::NotEqual,
+        Type::Equal,
+    ],
+    &[Type::Modulo],
+    &[Type::ZeroFillRightShift, Type::RightShift, Type::LeftShift],
+    &[Type::Exponentiation],
+    &[Type::Division, Type::Multiplication],
+    &[Type::Subtraction, Type::Addition],
 ];
 
-pub const ORDERED_UNARY_OPERATORS: &[Type] = &[
-    // Logical
-    Type::Not,
-    // Bitwise
-    Type::CountTrailingZeros,
-    Type::CountLeadingZeros,
-    // Standard
-    Type::Subtraction,
+pub const ORDERED_UNARY_OPERATORS: &[&[Type]] = &[
+    &[Type::Not],
+    &[Type::CountTrailingZeros, Type::CountLeadingZeros],
+    &[Type::Subtraction],
 ];
 
 #[derive(Debug, Clone)]
