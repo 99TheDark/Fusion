@@ -42,6 +42,11 @@ impl Parser {
         self.expect(Type::LeftBrace);
         let mut stmts: Vec<Box<Stmt>> = Vec::new();
         while self.tt() != Type::RightBrace {
+            if self.tt().is_line_ending() {
+                self.eat();
+                continue;
+            }
+
             stmts.push(Box::new(self.parseStmt()));
         }
 
@@ -98,7 +103,7 @@ impl Parser {
     }
 
     pub fn parsePrimary(&mut self) -> Expr {
-        let tok = self.at();
+        let tok = self.eat();
         match tok.typ {
             Type::Identifier(name) => Expr::Ident(ast::Ident { name }),
             _ => panic!("Invalid expression"),

@@ -125,6 +125,10 @@ impl Type {
         }
         false
     }
+
+    pub fn is_line_ending(self) -> bool {
+        self == Type::NewLine || self == Type::Semicolon
+    }
 }
 
 pub const SYMBOLS: &[Type] = &[
