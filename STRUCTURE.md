@@ -1,19 +1,20 @@
 # Statement Structure
-|Kind|Components|
-|-|-|
-| BinaryOp | Expr, Op, Expr |
+|Kind|Components|Status|
+|-|-|:-:|
+| Ident | Identifier | ✓ |
+| BinaryOp | Expr, Op, Expr | ✓ |
 | UnaryOp | Op, Expr |
-| Condition | Expr, Comp, Expr |
-| Scope | Expr(bool), LeftBrace, [Stmt], RightBrace |
+| Scope | LeftBrace, [Stmt], RightBrace | ✓ |
 | Group | LeftParen, Expr, RightParen |
 | List&lt;T&gt; | [T, Comma(skip last)] |
-| IfStmt | If, Expr(bool), Scope |
+| IfStmt | If, Expr(bool), Scope | ✓ |
 | WhileLoop | While, Expr(bool), Scope |
 | DoWhileLoop | Do, Scope, While, Expr(bool) |
-| Decl | Let, Ident, Assignment, Expr |
-| Decl | Let, Ident, Colon, Ident, Assignment, Expr |
-| Assign | Ident, Assignment, Expr |
-| OpAssign | Ident, Op, Assignment, Expr |
-| Param | Ident, Colon, Ident | 
+| Decl | Let, Identifier, Assignment, Expr |
+| Decl | Let, Identifier, Colon, Identifier, Assignment, Expr |
+| Assign | Identifier, Assignment, Expr |
+| OpAssign | Identifier, Op, Assignment, Expr |
+| Param | Identifier, Colon, Identifier | 
 | Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Scope |
-| Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Colon, List&lt;Ident&gt;, Scope |
+| Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Colon, List&lt;Identifier&gt;, Scope |
+| Tuple | LeftParen, List&lt;Expr&gt;, RightParen |
