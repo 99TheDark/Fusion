@@ -9,8 +9,8 @@
 | Group | LeftParen, Expr, RightParen |
 | List&lt;T&gt; | [T, Comma(skip last)] |
 | IfStmt | If, Expr(bool), Scope | ✓ |
-| WhileLoop | While, Expr(bool), Scope |
-| DoWhileLoop | Do, Scope, While, Expr(bool) |
+| WhileLoop | While, Expr(bool), Scope | ✓ |
+| DoWhileLoop | Do, Scope, While, Expr(bool) | ✓ |
 | Decl | Let, Ident, Assignment, Expr | ✓ |
 | Decl | Let, Ident, Colon, Ident, Assignment, Expr | ✓ |
 | Assign | Ident, Assignment, Expr |

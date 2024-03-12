@@ -53,8 +53,8 @@ pub struct WhileLoop {
 
 #[derive(Debug)]
 pub struct DoWhileLoop {
-    pub cond: Box<BinaryOp>,
     pub body: Box<Scope>,
+    pub cond: Box<Expr>,
 }
 
 // Expressions

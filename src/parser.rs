@@ -83,6 +83,8 @@ impl Parser {
             Type::LeftBrace => self.parse_scope_stmt(),
             Type::Let => self.parse_decl(),
             Type::If => self.parse_if_stmt(),
+            Type::While => self.parse_while_loop(),
+            Type::Do => self.parse_do_while_loop(),
             _ => panic!("Not a valid statement: {}", tok.typ),
         }
     }
@@ -126,6 +128,28 @@ impl Parser {
         Stmt::IfStmt(ast::IfStmt {
             cond: Box::new(cond),
             body: Box::new(body),
+        })
+    }
+
+    pub fn parse_while_loop(&mut self) -> Stmt {
+        self.eat();
+        let cond = self.parse_expr();
+        let body = self.parse_scope();
+
+        Stmt::WhileLoop(ast::WhileLoop {
+            cond: Box::new(cond),
+            body: Box::new(body),
+        })
+    }
+
+    pub fn parse_do_while_loop(&mut self) -> Stmt {
+        self.eat();
+        let cond = self.parse_expr();
+        let body = self.parse_scope();
+
+        Stmt::DoWhileLoop(ast::DoWhileLoop {
+            body: Box::new(body),
+            cond: Box::new(cond),
         })
     }
 

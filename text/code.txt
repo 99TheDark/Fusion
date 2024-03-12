@@ -5,3 +5,7 @@ if y > x {
     let z = y - x
     let maybe: bool = true | false ^& true
 }
+
+while 3 >= 2 + 1 {
+    
+}
