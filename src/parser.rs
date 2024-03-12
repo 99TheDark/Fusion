@@ -144,8 +144,9 @@ impl Parser {
 
     pub fn parse_do_while_loop(&mut self) -> Stmt {
         self.eat();
-        let cond = self.parse_expr();
         let body = self.parse_scope();
+        self.expect(Type::While);
+        let cond = self.parse_expr();
 
         Stmt::DoWhileLoop(ast::DoWhileLoop {
             body: Box::new(body),
