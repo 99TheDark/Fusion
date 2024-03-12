@@ -37,6 +37,11 @@ pub enum Type {
     GreaterThanOrEqual,
     LessThan,
     LessThanOrEqual,
+    LeftShift,
+    RightShift,
+    ZeroFillRightShift,
+    CountLeadingZeros,
+    CountTrailingZeros,
     Let,
     Colon,
     If,
@@ -96,6 +101,11 @@ impl Type {
                     Type::GreaterThanOrEqual => ">=",
                     Type::LessThan => "<",
                     Type::LessThanOrEqual => "<=",
+                    Type::LeftShift => "<<",
+                    Type::RightShift => ">>",
+                    Type::ZeroFillRightShift => ">>>",
+                    Type::CountLeadingZeros => "<..",
+                    Type::CountTrailingZeros => ">..",
                     Type::Let => "let",
                     Type::Colon => ":",
                     Type::If => "if",
@@ -161,6 +171,11 @@ pub const SYMBOLS: &[Type] = &[
     Type::GreaterThanOrEqual,
     Type::LessThan,
     Type::LessThanOrEqual,
+    Type::LeftShift,
+    Type::RightShift,
+    Type::ZeroFillRightShift,
+    Type::CountLeadingZeros,
+    Type::CountTrailingZeros,
     Type::Colon,
 ];
 
@@ -182,18 +197,42 @@ pub const KEYWORDS: &[Type] = &[
 ];
 
 pub const ORDERED_BINARY_OPERATORS: &[Type] = &[
-    Type::Equal,
-    Type::NotEqual,
-    Type::GreaterThan,
-    Type::GreaterThanOrEqual,
-    Type::LessThan,
+    // Logical
+    Type::Xor,
+    Type::Xand,
+    Type::Nor,
+    Type::Nand,
+    Type::Or,
+    Type::And,
+    // Comparison
     Type::LessThanOrEqual,
+    Type::LessThan,
+    Type::GreaterThanOrEqual,
+    Type::GreaterThan,
+    Type::NotEqual,
+    Type::Equal,
+    // Modulo
     Type::Modulo,
+    // Bitwise
+    Type::ZeroFillRightShift,
+    Type::RightShift,
+    Type::LeftShift,
+    // Standard
     Type::Exponentiation,
     Type::Division,
     Type::Multiplication,
     Type::Subtraction,
     Type::Addition,
+];
+
+pub const ORDERED_UNARY_OPERATORS: &[Type] = &[
+    // Logical
+    Type::Not,
+    // Bitwise
+    Type::CountTrailingZeros,
+    Type::CountLeadingZeros,
+    // Standard
+    Type::Subtraction,
 ];
 
 #[derive(Debug, Clone)]

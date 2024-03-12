@@ -62,6 +62,7 @@ pub struct DoWhileLoop {
 pub enum Expr {
     Ident(Ident),
     NumLit(NumLit),
+    BoolLit(BoolLit),
     BinaryOp(BinaryOp),
     UnaryOp(UnaryOp),
 }
@@ -75,6 +76,11 @@ pub struct Ident {
 #[derive(Debug)]
 pub struct NumLit {
     pub val: f32,
+}
+
+#[derive(Debug)]
+pub struct BoolLit {
+    pub val: bool,
 }
 
 #[derive(Debug)]

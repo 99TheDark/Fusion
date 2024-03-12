@@ -3,4 +3,5 @@ let y: int = 31
 
 if y > x {
     let z = y - x
+    let maybe = true | false ^& true
 }

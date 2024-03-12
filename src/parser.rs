@@ -62,10 +62,17 @@ impl Parser {
         }
     }
 
-    pub fn parse_numlit(&mut self) -> ast::NumLit {
+    pub fn parse_num_lit(&mut self) -> ast::NumLit {
         match self.eat().typ {
             Type::Number(val) => ast::NumLit { val },
             _ => panic!("Not a number"),
+        }
+    }
+
+    pub fn parse_bool_lit(&mut self) -> ast::BoolLit {
+        match self.eat().typ {
+            Type::Boolean(val) => ast::BoolLit { val },
+            _ => panic!("Not a boolean"),
         }
     }
 
@@ -150,7 +157,8 @@ impl Parser {
 
         let expr = match tok.typ {
             Type::Identifier(_) => Expr::Ident(self.parse_ident()),
-            Type::Number(_) => Expr::NumLit(self.parse_numlit()),
+            Type::Number(_) => Expr::NumLit(self.parse_num_lit()),
+            Type::Boolean(_) => Expr::BoolLit(self.parse_bool_lit()),
             _ => panic!("Invalid expression"),
         };
 
