@@ -38,7 +38,7 @@ impl Parser {
         tok
     }
 
-    pub fn parseScope(&mut self) -> ast::Scope {
+    pub fn parse_scope(&mut self) -> ast::Scope {
         self.expect(Type::LeftBrace);
         let mut stmts: Vec<Box<Stmt>> = Vec::new();
         while self.tt() != Type::RightBrace {
@@ -47,34 +47,34 @@ impl Parser {
                 continue;
             }
 
-            stmts.push(Box::new(self.parseStmt()));
+            stmts.push(Box::new(self.parse_stmt()));
         }
 
         ast::Scope { stmts }
     }
 
-    pub fn parseStmt(&mut self) -> Stmt {
+    pub fn parse_stmt(&mut self) -> Stmt {
         let tok = self.at();
         match tok.typ {
-            Type::LeftBrace => self.parseScopeStmt(),
-            Type::If => self.parseIfStmt(),
+            Type::LeftBrace => self.parse_scope_stmt(),
+            Type::If => self.parse_if_stmt(),
             _ => panic!("Not a valid statement: {}", tok.typ),
         }
     }
 
-    pub fn parseScopeStmt(&mut self) -> Stmt {
+    pub fn parse_scope_stmt(&mut self) -> Stmt {
         let mut stmts: Vec<Box<Stmt>> = Vec::new();
         while self.tt() != Type::RightBrace {
-            stmts.push(Box::new(self.parseStmt()));
+            stmts.push(Box::new(self.parse_stmt()));
         }
 
         Stmt::Scope(ast::Scope { stmts })
     }
 
-    pub fn parseIfStmt(&mut self) -> Stmt {
+    pub fn parse_if_stmt(&mut self) -> Stmt {
         self.eat();
-        let cond = self.parseExpr();
-        let body = self.parseScope();
+        let cond = self.parse_expr();
+        let body = self.parse_scope();
 
         Stmt::IfStmt(ast::IfStmt {
             cond: Box::new(cond),
@@ -82,15 +82,15 @@ impl Parser {
         })
     }
 
-    pub fn parseExpr(&mut self) -> Expr {
-        self.parseComparison()
+    pub fn parse_expr(&mut self) -> Expr {
+        self.parse_comparison()
     }
 
-    pub fn parseComparison(&mut self) -> Expr {
-        let left = self.parsePrimary();
+    pub fn parse_comparison(&mut self) -> Expr {
+        let left = self.parse_primary();
         if self.tt().is(COMPARISONS) {
             let comp = self.eat();
-            let right = self.parseExpr();
+            let right = self.parse_expr();
 
             return Expr::BinaryOp(ast::BinaryOp {
                 op: comp.typ,
@@ -102,7 +102,7 @@ impl Parser {
         left
     }
 
-    pub fn parsePrimary(&mut self) -> Expr {
+    pub fn parse_primary(&mut self) -> Expr {
         let tok = self.eat();
         match tok.typ {
             Type::Identifier(name) => Expr::Ident(ast::Ident { name }),
@@ -112,6 +112,6 @@ impl Parser {
 
     pub fn parse(&mut self) {
         println!("{}", "-".to_owned().repeat(100));
-        println!("{:#?}", self.parseStmt());
+        println!("{:#?}", self.parse_stmt());
     }
 }
