@@ -25,4 +25,17 @@ impl Location {
             idx: 0,
         }
     }
+
+    pub fn shift(&mut self, count: u32) -> Location {
+        self.idx += count;
+        self.col += count;
+
+        self.clone()
+    }
+
+    pub fn next(&mut self) -> Location {
+        self.shift(1);
+
+        self.clone()
+    }
 }

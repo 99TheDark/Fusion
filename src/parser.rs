@@ -1,14 +1,20 @@
+use std::rc::Rc;
+
 use crate::ast::{self, Expr, Stmt};
+use crate::error::Error;
+use crate::location::Location;
 use crate::tokens::{Token, Type, ORDERED_BINARY_OPERATORS};
 
 pub struct Parser {
+    lines: Rc<Vec<String>>,
     tokens: Vec<Token>,
     idx: usize,
 }
 
 impl Parser {
-    pub fn new(tokens: &Vec<Token>) -> Parser {
+    pub fn new(source: Rc<String>, tokens: &Vec<Token>) -> Parser {
         Parser {
+            lines: Rc::new(source.split("\n").map(|s| s.to_owned()).collect()),
             tokens: tokens.clone(),
             idx: 0,
         }
@@ -22,6 +28,10 @@ impl Parser {
         self.at().typ
     }
 
+    pub fn cur_loc(&self) -> Location {
+        self.at().loc
+    }
+
     pub fn eat(&mut self) -> Token {
         let tok = self.at();
         self.idx += 1;
@@ -31,7 +41,14 @@ impl Parser {
     pub fn expect(&mut self, expected: Type) -> Token {
         let tok = self.at();
         if tok.typ != expected {
-            panic!("Expected {}, instead got {}", expected, tok.typ.to_string());
+            Error::new(
+                Rc::clone(&self.lines),
+                format!("Expected {}, instead got {}", expected, tok.typ.to_string()),
+                self.cur_loc().next(),
+                self.cur_loc().shift(self.at().size + 1), // Later to use Metadata
+                0,
+            )
+            .panic();
         }
 
         self.idx += 1;

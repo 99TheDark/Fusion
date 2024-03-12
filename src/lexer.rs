@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     location::Location,
     tokens::{Token, Type, KEYWORDS, SYMBOLS},
@@ -5,17 +7,17 @@ use crate::{
 
 // Lexer
 pub struct Lexer {
+    source: Rc<String>,
     loc: Location,
     tokens: Vec<Token>,
-    source: String,
 }
 
 impl Lexer {
-    pub fn new(code: String) -> Lexer {
+    pub fn new(code: Rc<String>) -> Lexer {
         Lexer {
+            source: code,
             loc: Location::empty(),
             tokens: Vec::new(),
-            source: code,
         }
     }
 
@@ -79,7 +81,7 @@ impl Lexer {
     fn push_identifier(&mut self, capture: &String) -> bool {
         let size = capture.len();
         if size != 0 {
-            let loc = Location::new(self.loc.idx - size as u32, self.loc.row, self.loc.col);
+            let loc = Location::new(self.loc.row, self.loc.col, self.loc.idx - size as u32);
 
             let value = capture.clone();
             let typ = match capture.clone().parse::<f32>() {
@@ -113,7 +115,7 @@ impl Lexer {
             let (is_symbol, symbol) = self.symbol();
             if !is_symbol {
                 capture += &self.at();
-                self.loc.idx += 1;
+                self.loc.next();
             } else {
                 if self.push_identifier(&capture) {
                     capture.clear();
