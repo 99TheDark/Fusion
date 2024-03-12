@@ -1,2 +1,3 @@
 # TODO
-- Combine - sign and number to make a negative number
+- Combine negative sign and number to make a negative number
+- Error generation

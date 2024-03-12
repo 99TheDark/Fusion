@@ -2,7 +2,7 @@ use core::fmt;
 
 use crate::location::Location;
 
-#[derive(Debug, Clone)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Type {
     Identifier(String),
     Whitespace,
@@ -54,61 +54,7 @@ pub enum Type {
 
 impl fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO: Delete this mess
-        let string = match self {
-            Type::Number(n) => n.to_string(),
-            Type::Boolean(b) => b.to_string(),
-            simple => match simple {
-                Type::Identifier(s) => s,
-                Type::Whitespace => "whitespace",
-                Type::NewLine => "new line",
-                Type::Semicolon => "semicolon",
-                Type::Module => "module",
-                Type::Assignment => "equals sign",
-                Type::LeftParen => "left parenthesis",
-                Type::RightParen => "right parenthesis",
-                Type::LeftBrace => "left brace",
-                Type::RightBrace => "right brace",
-                Type::LeftBracket => "left bracket",
-                Type::RightBracket => "right bracket",
-                Type::Addition => "addition sign",
-                Type::Subtraction => "subtraction sign",
-                Type::Multiplication => "multiplication sign",
-                Type::Division => "division sig",
-                Type::Exponentiation => "exponentiation sign",
-                Type::Modulo => "modulo sign",
-                Type::And => "and",
-                Type::Or => "or",
-                Type::Nand => "nand",
-                Type::Nor => "nor",
-                Type::Xand => "xand",
-                Type::Xor => "xor",
-                Type::Not => "not",
-                Type::Equal => "equals sign",
-                Type::NotEqual => "not equals sign",
-                Type::GreaterThan => "greater than",
-                Type::GreaterThanOrEqual => "greater than or equal",
-                Type::LessThan => "less than",
-                Type::LessThanOrEqual => "less than or equal",
-                Type::Let => "let",
-                Type::Colon => ":",
-                Type::If => "if",
-                Type::For => "for",
-                Type::While => "while",
-                Type::Do => "do",
-                Type::Function => "function",
-                Type::Class => "class",
-                Type::Public => "public",
-                Type::Private => "private",
-                Type::Inner => "inner",
-                Type::Operator => "operator",
-                Type::EOF => "end of file",
-                _ => "", // This should never be reached
-            }
-            .to_owned(),
-        };
-
-        write!(f, "{}", string)
+        write!(f, "{:?}", self)
     }
 }
 
@@ -170,6 +116,15 @@ impl Type {
 
         src.to_vec().into_iter().map(|s| s.to_owned()).collect()
     }
+
+    pub fn is(&self, types: &[Type]) -> bool {
+        for typ in types {
+            if self == typ {
+                return true;
+            }
+        }
+        false
+    }
 }
 
 pub const SYMBOLS: &[Type] = &[
@@ -220,6 +175,15 @@ pub const KEYWORDS: &[Type] = &[
     Type::Private,
     Type::Inner,
     Type::Operator,
+];
+
+pub const COMPARISONS: &[Type] = &[
+    Type::Equal,
+    Type::NotEqual,
+    Type::GreaterThan,
+    Type::GreaterThanOrEqual,
+    Type::LessThan,
+    Type::LessThanOrEqual,
 ];
 
 #[derive(Debug, Clone)]

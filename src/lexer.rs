@@ -86,10 +86,12 @@ impl Lexer {
                 Ok(num) => Type::Number(num), // TODO: Ignore inf, -inf, nan, etc
                 Err(_) => {
                     let mut ident_typ = Type::Identifier(capture.clone());
-                    for keyword in KEYWORDS {
-                        if value == keyword.to_string() {
-                            ident_typ = keyword.clone();
-                            break;
+                    'main: for keyword in KEYWORDS {
+                        for src in keyword.src_strings() {
+                            if value == src {
+                                ident_typ = keyword.clone();
+                                break 'main;
+                            }
                         }
                     }
 
@@ -122,6 +124,13 @@ impl Lexer {
         }
         self.push_identifier(&capture);
 
+        // Add EOF token
+        self.push(Token {
+            loc: self.loc,
+            typ: Type::EOF,
+            size: 0,
+        });
+
         self.tokens.clone()
     }
 
@@ -129,7 +138,7 @@ impl Lexer {
         self.tokens
             .clone()
             .into_iter()
-            .filter(|tok| !matches!(tok.typ, Type::Whitespace))
+            .filter(|tok| tok.typ != Type::Whitespace)
             .collect()
     }
 }
