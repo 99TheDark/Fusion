@@ -31,7 +31,7 @@ impl Parser {
     pub fn expect(&mut self, expected: Type) -> Token {
         let tok = self.at();
         if tok.typ != expected {
-            panic!("Expected {}, instead got {}", tok.typ.to_string(), expected);
+            panic!("Expected {}, instead got {}", expected, tok.typ.to_string());
         }
 
         self.idx += 1;
