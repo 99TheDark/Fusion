@@ -39,50 +39,42 @@ impl Lexer {
     }
 
     fn push(&mut self, token: Token) {
-        self.tokens.push(token.clone());
-
         self.loc.idx += token.size;
-        match token.typ {
-            Type::NewLine => {
-                self.loc.row += 1;
-                self.loc.col = 0;
-            }
-            _ => {
-                self.loc.col += token.size;
-            }
+        if token.typ == Type::NewLine {
+            self.loc.row += 1;
+            self.loc.col = 0;
+        } else {
+            self.loc.col += token.size;
         }
-    }
 
-    fn token(&self, token_type: Type, value: String) -> Token {
-        Token::new(self.loc, token_type, value)
+        self.tokens
+            .push(Token::new(token.start, self.loc.clone(), token.typ));
     }
 
     fn symbol(&mut self) -> (bool, Token) {
-        let mut success = String::new();
+        let mut max_len = 0;
         let mut successful_pattern = Type::EOF;
         for pattern in SYMBOLS {
             let sources = pattern.src_strings();
             for src in sources {
-                if self.ahead(src.len()) == src && src.len() > success.len() {
-                    success = src.to_string();
+                if self.ahead(src.len()) == src && src.len() > max_len {
+                    max_len = src.len();
                     successful_pattern = pattern.clone();
                 }
             }
         }
 
-        if success.len() == 0 {
+        if max_len == 0 {
             (false, Token::empty())
         } else {
-            let token = self.token(successful_pattern, success);
+            let token = Token::open(self.loc.clone(), successful_pattern, max_len as u32);
             (true, token)
         }
     }
 
-    fn push_identifier(&mut self, capture: &String) -> bool {
+    fn push_identifier(&mut self, capture: &String, cap_start: Location) -> bool {
         let size = capture.len();
         if size != 0 {
-            let loc = Location::new(self.loc.row, self.loc.col, self.loc.idx - size as u32);
-
             let value = capture.clone();
             let typ = match capture.clone().parse::<f32>() {
                 Ok(num) => Type::Number(num), // TODO: Ignore inf, -inf, nan, etc
@@ -101,7 +93,7 @@ impl Lexer {
                 }
             };
 
-            let token = Token::new(loc, typ, value);
+            let token = Token::new(cap_start, self.loc, typ);
             self.tokens.push(token);
 
             return true;
@@ -111,27 +103,28 @@ impl Lexer {
 
     pub fn lex(&mut self) -> Vec<Token> {
         let mut capture = String::new();
+        let mut cap_start = Location::empty();
         while self.loc.idx < self.source.len() as u32 {
             let (is_symbol, symbol) = self.symbol();
             if !is_symbol {
+                if capture.len() == 0 {
+                    cap_start = self.loc.clone();
+                }
+
                 capture += &self.at();
                 self.loc.next();
             } else {
-                if self.push_identifier(&capture) {
+                if self.push_identifier(&capture, cap_start) {
                     capture.clear();
                 };
 
                 self.push(symbol);
             }
         }
-        self.push_identifier(&capture);
+        self.push_identifier(&capture, cap_start);
 
         // Add EOF token
-        self.push(Token {
-            loc: self.loc,
-            typ: Type::EOF,
-            size: 0,
-        });
+        self.push(Token::new(self.loc, self.loc, Type::EOF));
 
         self.tokens.clone()
     }

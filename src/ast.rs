@@ -3,33 +3,31 @@ use crate::tokens::Type;
 
 // TODO: Implement for stmts and exprs
 #[derive(Debug)]
-pub struct Metadata {
+pub struct Meta<T> {
+    pub src: T,
     pub start: Location,
     pub end: Location,
 }
 
-impl Metadata {
-    pub fn new(start: Location, end: Location) -> Metadata {
-        Metadata {
-            start: start.clone(),
-            end: end.clone(),
-        }
+impl<T> Meta<T> {
+    pub fn new(src: T, start: Location, end: Location) -> Meta<T> {
+        Meta { src, start, end }
     }
 }
 
 // Statements
 #[derive(Debug)]
 pub enum Stmt {
-    Scope(Scope /* Add Metadata here */),
-    Decl(Decl),
-    IfStmt(IfStmt),
-    WhileLoop(WhileLoop),
-    DoWhileLoop(DoWhileLoop),
+    Scope(Meta<Scope>),
+    Decl(Meta<Decl>),
+    IfStmt(Meta<IfStmt>),
+    WhileLoop(Meta<WhileLoop>),
+    DoWhileLoop(Meta<DoWhileLoop>),
 }
 
 #[derive(Debug)]
 pub struct Scope {
-    pub stmts: Vec<Box<Stmt>>, // Statements
+    pub stmts: Vec<Box<Stmt>>,
 }
 
 #[derive(Debug)]
@@ -60,11 +58,11 @@ pub struct DoWhileLoop {
 // Expressions
 #[derive(Debug)]
 pub enum Expr {
-    Ident(Ident),
-    NumLit(NumLit),
-    BoolLit(BoolLit),
-    BinaryOp(BinaryOp),
-    UnaryOp(UnaryOp),
+    Ident(Meta<Ident>),
+    NumLit(Meta<NumLit>),
+    BoolLit(Meta<BoolLit>),
+    BinaryOp(Meta<BinaryOp>),
+    UnaryOp(Meta<UnaryOp>),
 }
 
 #[derive(Debug)]

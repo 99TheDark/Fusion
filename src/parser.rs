@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::ast::{self, Expr, Stmt};
+use crate::ast::{self, Expr, Meta, Stmt};
 use crate::error::{Error, ErrorCode};
 use crate::location::Location;
 use crate::tokens::{Token, Type, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS};
@@ -32,7 +32,11 @@ impl Parser {
     }
 
     pub fn cur_loc(&self) -> Location {
-        self.at().loc
+        self.at().start
+    }
+
+    pub fn cur_stop(&self) -> Location {
+        self.at().end
     }
 
     pub fn eat(&mut self) -> Token {
@@ -141,17 +145,20 @@ impl Parser {
     }
 
     pub fn parse_scope_stmt(&mut self) -> Stmt {
+        let start = self.cur_loc();
+
         let mut stmts: Vec<Box<Stmt>> = Vec::new();
         while self.tt() != Type::RightBrace {
             stmts.push(Box::new(self.parse_stmt()));
         }
 
-        Stmt::Scope(ast::Scope { stmts })
+        Stmt::Scope(Meta::new(ast::Scope { stmts }, start, self.cur_loc()))
     }
 
     pub fn parse_decl(&mut self) -> Stmt {
-        self.eat();
+        let start = self.cur_loc();
 
+        self.eat();
         let ident = self.parse_ident();
 
         let annotation = if self.tt() == Type::Colon {
@@ -164,45 +171,67 @@ impl Parser {
         self.expect(Type::Assignment);
         let value = self.parse_expr();
 
-        Stmt::Decl(ast::Decl {
-            name: Box::new(ident),
-            annot: annotation,
-            val: Box::new(value),
-        })
+        Stmt::Decl(Meta::new(
+            ast::Decl {
+                name: Box::new(ident),
+                annot: annotation,
+                val: Box::new(value),
+            },
+            start,
+            self.cur_loc(),
+        ))
     }
 
     pub fn parse_if_stmt(&mut self) -> Stmt {
+        let start = self.cur_loc();
+
         self.eat();
         let cond = self.parse_expr();
         let body = self.parse_scope();
 
-        Stmt::IfStmt(ast::IfStmt {
-            cond: Box::new(cond),
-            body: Box::new(body),
-        })
+        Stmt::IfStmt(Meta::new(
+            ast::IfStmt {
+                cond: Box::new(cond),
+                body: Box::new(body),
+            },
+            start,
+            self.cur_loc(),
+        ))
     }
 
     pub fn parse_while_loop(&mut self) -> Stmt {
+        let start = self.cur_loc();
+
         self.eat();
         let cond = self.parse_expr();
         let body = self.parse_scope();
 
-        Stmt::WhileLoop(ast::WhileLoop {
-            cond: Box::new(cond),
-            body: Box::new(body),
-        })
+        Stmt::WhileLoop(Meta::new(
+            ast::WhileLoop {
+                cond: Box::new(cond),
+                body: Box::new(body),
+            },
+            start,
+            self.cur_loc(),
+        ))
     }
 
     pub fn parse_do_while_loop(&mut self) -> Stmt {
+        let start = self.cur_loc();
+
         self.eat();
         let body = self.parse_scope();
         self.expect(Type::While);
         let cond = self.parse_expr();
 
-        Stmt::DoWhileLoop(ast::DoWhileLoop {
-            body: Box::new(body),
-            cond: Box::new(cond),
-        })
+        Stmt::DoWhileLoop(Meta::new(
+            ast::DoWhileLoop {
+                body: Box::new(body),
+                cond: Box::new(cond),
+            },
+            start,
+            self.cur_loc(),
+        ))
     }
 
     // Expressions
@@ -213,15 +242,21 @@ impl Parser {
     pub fn parse_binop(&mut self, depth: Option<usize>) -> Expr {
         let idx = depth.unwrap_or(0);
         if idx < ORDERED_BINARY_OPERATORS.len() {
+            let start = self.cur_loc();
+
             let mut left = self.parse_binop(Some(idx + 1));
             while self.tt().is(ORDERED_BINARY_OPERATORS[idx]) {
                 let op = self.eat().typ;
 
-                left = Expr::BinaryOp(ast::BinaryOp {
-                    op,
-                    lhs: Box::new(left),
-                    rhs: Box::new(self.parse_binop(Some(idx + 1))),
-                });
+                left = Expr::BinaryOp(Meta::new(
+                    ast::BinaryOp {
+                        op,
+                        lhs: Box::new(left),
+                        rhs: Box::new(self.parse_binop(Some(idx + 1))),
+                    },
+                    start,
+                    self.cur_loc(),
+                ));
             }
 
             left
@@ -232,10 +267,12 @@ impl Parser {
 
     pub fn parse_unop(&mut self) -> Expr {
         if self.tt().is(ORDERED_UNARY_OPERATORS) {
+            let start = self.cur_loc();
+
             let op = self.eat().typ;
             let val = Box::new(self.parse_primary());
 
-            Expr::UnaryOp(ast::UnaryOp { op, val })
+            Expr::UnaryOp(Meta::new(ast::UnaryOp { op, val }, start, self.cur_loc()))
         } else {
             self.parse_primary()
         }
@@ -245,9 +282,21 @@ impl Parser {
         let tok = self.at();
 
         let expr = match tok.typ {
-            Type::Identifier(_) => Expr::Ident(self.parse_ident()),
-            Type::Number(_) => Expr::NumLit(self.parse_num_lit()),
-            Type::Boolean(_) => Expr::BoolLit(self.parse_bool_lit()),
+            Type::Identifier(_) => Expr::Ident(Meta::new(
+                self.parse_ident(),
+                self.cur_loc(),
+                self.cur_loc(),
+            )),
+            Type::Number(_) => Expr::NumLit(Meta::new(
+                self.parse_num_lit(),
+                self.cur_loc(),
+                self.cur_loc(),
+            )),
+            Type::Boolean(_) => Expr::BoolLit(Meta::new(
+                self.parse_bool_lit(),
+                self.cur_loc(),
+                self.cur_loc(),
+            )),
             _ => {
                 self.panic(
                     format!("Invalid expression {}", tok.typ),

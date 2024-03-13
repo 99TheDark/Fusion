@@ -19,6 +19,9 @@ fn main() {
 
     let tokens = lexer.filter();
 
+    println!("{:#?}", tokens);
+
     let mut parser = Parser::new(Rc::clone(&code), &tokens);
     parser.parse();
+    // parser.print();
 }
