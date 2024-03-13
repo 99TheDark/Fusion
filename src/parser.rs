@@ -23,6 +23,10 @@ impl Parser {
         }
     }
 
+    pub fn prev(&self) -> Token {
+        self.tokens.get(self.idx - 1).unwrap().clone()
+    }
+
     pub fn at(&self) -> Token {
         self.tokens.get(self.idx).unwrap().clone()
     }
@@ -37,6 +41,10 @@ impl Parser {
 
     pub fn cur_stop(&self) -> Location {
         self.at().end
+    }
+
+    pub fn prev_stop(&self) -> Location {
+        self.prev().end
     }
 
     pub fn eat(&mut self) -> Token {
@@ -142,6 +150,7 @@ impl Parser {
                 panic!();
             }
         }
+        // TODO: Expect semicolon, newline or eof at the end of each statement
     }
 
     pub fn parse_scope_stmt(&mut self) -> Stmt {
@@ -152,7 +161,7 @@ impl Parser {
             stmts.push(Box::new(self.parse_stmt()));
         }
 
-        Stmt::Scope(Meta::new(ast::Scope { stmts }, start, self.cur_loc()))
+        Stmt::Scope(Meta::new(ast::Scope { stmts }, start, self.prev_stop()))
     }
 
     pub fn parse_decl(&mut self) -> Stmt {
@@ -178,7 +187,7 @@ impl Parser {
                 val: Box::new(value),
             },
             start,
-            self.cur_loc(),
+            self.prev_stop(),
         ))
     }
 
@@ -195,7 +204,7 @@ impl Parser {
                 body: Box::new(body),
             },
             start,
-            self.cur_loc(),
+            self.prev_stop(),
         ))
     }
 
@@ -212,7 +221,7 @@ impl Parser {
                 body: Box::new(body),
             },
             start,
-            self.cur_loc(),
+            self.prev_stop(),
         ))
     }
 
@@ -230,7 +239,7 @@ impl Parser {
                 cond: Box::new(cond),
             },
             start,
-            self.cur_loc(),
+            self.prev_stop(),
         ))
     }
 
@@ -255,7 +264,7 @@ impl Parser {
                         rhs: Box::new(self.parse_binop(Some(idx + 1))),
                     },
                     start,
-                    self.cur_loc(),
+                    self.prev_stop(),
                 ));
             }
 
@@ -272,7 +281,7 @@ impl Parser {
             let op = self.eat().typ;
             let val = Box::new(self.parse_primary());
 
-            Expr::UnaryOp(Meta::new(ast::UnaryOp { op, val }, start, self.cur_loc()))
+            Expr::UnaryOp(Meta::new(ast::UnaryOp { op, val }, start, self.prev_stop()))
         } else {
             self.parse_primary()
         }
@@ -280,23 +289,17 @@ impl Parser {
 
     pub fn parse_primary(&mut self) -> Expr {
         let tok = self.at();
-
-        let expr = match tok.typ {
-            Type::Identifier(_) => Expr::Ident(Meta::new(
-                self.parse_ident(),
-                self.cur_loc(),
-                self.cur_loc(),
-            )),
-            Type::Number(_) => Expr::NumLit(Meta::new(
-                self.parse_num_lit(),
-                self.cur_loc(),
-                self.cur_loc(),
-            )),
-            Type::Boolean(_) => Expr::BoolLit(Meta::new(
-                self.parse_bool_lit(),
-                self.cur_loc(),
-                self.cur_loc(),
-            )),
+        let start = self.cur_loc();
+        match tok.typ {
+            Type::Identifier(_) => {
+                Expr::Ident(Meta::new(self.parse_ident(), start, self.cur_stop()))
+            }
+            Type::Number(_) => {
+                Expr::NumLit(Meta::new(self.parse_num_lit(), start, self.cur_stop()))
+            }
+            Type::Boolean(_) => {
+                Expr::BoolLit(Meta::new(self.parse_bool_lit(), start, self.cur_stop()))
+            }
             _ => {
                 self.panic(
                     format!("Invalid expression {}", tok.typ),
@@ -304,9 +307,7 @@ impl Parser {
                 );
                 panic!();
             }
-        };
-
-        expr
+        }
     }
 
     pub fn parse(&mut self) {

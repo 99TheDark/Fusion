@@ -6,7 +6,7 @@ if y > x {
     let maybe: bool = !true | false ^& true
 }
 
-do {
+do 345.987 {
     let thing = 4.5 ^ 6
 } while true ^| false
 
