@@ -214,7 +214,7 @@ pub const ORDERED_BINARY_OPERATORS: &[&[Type]] = &[
         Type::Equal,
     ],
     &[Type::Modulo],
-    &[Type::ZeroFillRightShift, Type::RightShift, Type::LeftShift],
+    &[Type::RightShift, Type::LeftShift, Type::ZeroFillRightShift],
     &[Type::Exponentiation],
     &[Type::Division, Type::Multiplication],
     &[Type::Subtraction, Type::Addition],

@@ -270,6 +270,6 @@ impl Parser {
             stmts.push(self.parse_stmt());
         }
 
-        println!("{:#?}", stmts);
+        println!("{}", format!("{:#?}", stmts).replace("  ", " "));
     }
 }
