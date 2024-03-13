@@ -34,8 +34,8 @@ pub enum Type {
     Equal,
     NotEqual,
     GreaterThan,
-    GreaterThanOrEqual,
     LessThan,
+    GreaterThanOrEqual,
     LessThanOrEqual,
     LeftShift,
     RightShift,
@@ -98,8 +98,8 @@ impl Type {
                     Type::Equal => "==",
                     Type::NotEqual => "!=",
                     Type::GreaterThan => ">",
-                    Type::GreaterThanOrEqual => ">=",
                     Type::LessThan => "<",
+                    Type::GreaterThanOrEqual => ">=",
                     Type::LessThanOrEqual => "<=",
                     Type::LeftShift => "<<",
                     Type::RightShift => ">>",
@@ -168,8 +168,8 @@ pub const SYMBOLS: &[Type] = &[
     Type::Equal,
     Type::NotEqual,
     Type::GreaterThan,
-    Type::GreaterThanOrEqual,
     Type::LessThan,
+    Type::GreaterThanOrEqual,
     Type::LessThanOrEqual,
     Type::LeftShift,
     Type::RightShift,
@@ -198,17 +198,17 @@ pub const KEYWORDS: &[Type] = &[
 
 pub const ORDERED_BINARY_OPERATORS: &[&[Type]] = &[
     &[
-        Type::Xor,
         Type::Xand,
-        Type::Nor,
+        Type::Xor,
         Type::Nand,
-        Type::Or,
+        Type::Nor,
         Type::And,
+        Type::Or,
     ],
     &[
         Type::LessThanOrEqual,
-        Type::LessThan,
         Type::GreaterThanOrEqual,
+        Type::LessThan,
         Type::GreaterThan,
         Type::NotEqual,
         Type::Equal,
@@ -220,10 +220,11 @@ pub const ORDERED_BINARY_OPERATORS: &[&[Type]] = &[
     &[Type::Subtraction, Type::Addition],
 ];
 
-pub const ORDERED_UNARY_OPERATORS: &[&[Type]] = &[
-    &[Type::Not],
-    &[Type::CountTrailingZeros, Type::CountLeadingZeros],
-    &[Type::Subtraction],
+pub const ORDERED_UNARY_OPERATORS: &[Type] = &[
+    Type::Not,
+    Type::CountTrailingZeros,
+    Type::CountLeadingZeros,
+    Type::Subtraction,
 ];
 
 #[derive(Debug, Clone)]

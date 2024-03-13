@@ -6,3 +6,4 @@
     - Comments
     - Strings
 - Pretty print AST
+- Reverse operator precedence

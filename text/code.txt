@@ -3,11 +3,11 @@ let y: int = 31
 
 if y > x {
     let z = y - x
-    let maybe: bool = true | false ^& true
+    let maybe: bool = !true | false ^& true
 }
 
 do {
     let thing = 4.5 ^ 6
 } while true ^| false
 
-let xyz = -231
+let abc = -231

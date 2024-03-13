@@ -4,7 +4,7 @@
 | Ident | Identifier | ✓ |
 | NumLit | Number | ✓ |
 | BinaryOp | Expr, Op, Expr | ✓ |
-| UnaryOp | Op, Expr |
+| UnaryOp | Op, Expr | ✓ |
 | Scope | LeftBrace, [Stmt], RightBrace | ✓ |
 | Group | LeftParen, Expr, RightParen |
 | List&lt;T&gt; | [T, Comma(skip last)] |

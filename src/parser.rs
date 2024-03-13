@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::ast::{self, Expr, Stmt};
 use crate::error::{Error, ErrorCode};
 use crate::location::Location;
-use crate::tokens::{Token, Type, ORDERED_BINARY_OPERATORS};
+use crate::tokens::{Token, Type, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS};
 
 pub struct Parser {
     lines: Rc<Vec<String>>,
@@ -213,16 +213,26 @@ impl Parser {
             let mut left = self.parse_binop(Some(idx + 1));
             while self.tt().is(ORDERED_BINARY_OPERATORS[idx]) {
                 let op = self.eat().typ;
-                let right = self.parse_binop(Some(idx + 1));
 
                 left = Expr::BinaryOp(ast::BinaryOp {
                     op,
                     lhs: Box::new(left),
-                    rhs: Box::new(right),
+                    rhs: Box::new(self.parse_binop(Some(idx + 1))),
                 });
             }
 
             left
+        } else {
+            self.parse_unop()
+        }
+    }
+
+    pub fn parse_unop(&mut self) -> Expr {
+        if self.tt().is(ORDERED_UNARY_OPERATORS) {
+            let op = self.eat().typ;
+            let val = Box::new(self.parse_primary());
+
+            Expr::UnaryOp(ast::UnaryOp { op, val })
         } else {
             self.parse_primary()
         }
@@ -237,7 +247,7 @@ impl Parser {
             Type::Boolean(_) => Expr::BoolLit(self.parse_bool_lit()),
             _ => {
                 self.panic(
-                    "Invalid expression".to_owned(),
+                    format!("Invalid expression {}", tok.typ),
                     ErrorCode::InvalidExpression,
                 );
                 panic!();

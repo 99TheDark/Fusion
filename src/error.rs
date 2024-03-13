@@ -51,13 +51,11 @@ impl Error {
         let Location { row, col, idx } = self.start;
         let Location { idx: end_idx, .. } = self.end;
 
-        println!("{} to {}", self.start, self.end);
-
         let num_size = size(row + 1);
 
         let mut err = String::new();
         err += &format!("E{:0>4}:\n", self.id);
-        for idx in u32::max(row - 4, 0)..=row {
+        for idx in (i32::max(row as i32 - 4, 0) as u32)..=row {
             let line_num = idx + 1;
             err += &format!("{}. {}", line_num, " ".repeat(num_size - size(line_num)));
             err += &format!("{}\n", self.lines.get(idx as usize).unwrap());
