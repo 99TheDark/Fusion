@@ -1,3 +1,4 @@
+use core::fmt;
 use std::rc::Rc;
 
 use crate::location::Location;
@@ -7,11 +8,26 @@ pub struct Error {
     msg: String,
     start: Location,
     end: Location,
-    id: u32, // TODO: Convert to enum value
+    id: ErrorCode,
 }
 
 fn size(num: u32) -> usize {
     num.to_string().len()
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum ErrorCode {
+    Unknown,
+    UnexpectedToken,
+    IncorrectParsingType,
+    InvalidStatement,
+    InvalidExpression,
+}
+
+impl fmt::Display for ErrorCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 impl Error {
@@ -20,7 +36,7 @@ impl Error {
         msg: String,
         start: Location,
         end: Location,
-        id: u32,
+        id: ErrorCode,
     ) -> Error {
         Error {
             lines,
@@ -35,6 +51,8 @@ impl Error {
         let Location { row, col, idx } = self.start;
         let Location { idx: end_idx, .. } = self.end;
 
+        println!("{} to {}", self.start, self.end);
+
         let num_size = size(row + 1);
 
         let mut err = String::new();
@@ -45,11 +63,10 @@ impl Error {
             err += &format!("{}\n", self.lines.get(idx as usize).unwrap());
         }
 
-        println!("{}", num_size + col as usize + 2);
         err += &format!(
             "{}{}\n",
             " ".repeat(usize::max(num_size + col as usize + 2, 0)),
-            "^".repeat((end_idx - idx) as usize + 1),
+            "^".repeat(u32::max(end_idx - idx, 1) as usize),
         );
 
         err += &format!("{} ({}:{})\n", self.msg, row + 1, col + 1);

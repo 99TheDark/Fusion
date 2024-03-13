@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::ast::{self, Expr, Stmt};
-use crate::error::Error;
+use crate::error::{Error, ErrorCode};
 use crate::location::Location;
 use crate::tokens::{Token, Type, ORDERED_BINARY_OPERATORS};
 
@@ -41,18 +41,25 @@ impl Parser {
     pub fn expect(&mut self, expected: Type) -> Token {
         let tok = self.at();
         if tok.typ != expected {
-            Error::new(
-                Rc::clone(&self.lines),
+            self.panic(
                 format!("Expected {}, instead got {}", expected, tok.typ.to_string()),
-                self.cur_loc().next(),
-                self.cur_loc().shift(self.at().size + 1), // Later to use Metadata
-                0,
-            )
-            .panic();
+                ErrorCode::UnexpectedToken,
+            );
         }
 
         self.idx += 1;
         tok
+    }
+
+    pub fn panic(&self, message: String, id: ErrorCode) {
+        Error::new(
+            Rc::clone(&self.lines),
+            message,
+            self.cur_loc(),
+            self.cur_loc().shift(self.at().size), // Later to use Metadata
+            id,
+        )
+        .panic();
     }
 
     // Raw parses
@@ -73,23 +80,44 @@ impl Parser {
     }
 
     pub fn parse_ident(&mut self) -> ast::Ident {
-        match self.eat().typ {
+        let tok = self.eat();
+        match tok.typ {
             Type::Identifier(name) => ast::Ident { name },
-            _ => panic!("Not an identifier"),
+            _ => {
+                self.panic(
+                    format!("{} is not an identifier", tok),
+                    ErrorCode::IncorrectParsingType,
+                );
+                panic!(); // So no need to return ast::Ident { name: "" }, takes a lot of lines of code
+            }
         }
     }
 
     pub fn parse_num_lit(&mut self) -> ast::NumLit {
-        match self.eat().typ {
+        let tok = self.eat();
+        match tok.typ {
             Type::Number(val) => ast::NumLit { val },
-            _ => panic!("Not a number"),
+            _ => {
+                self.panic(
+                    format!("{} is not a number", tok),
+                    ErrorCode::IncorrectParsingType,
+                );
+                panic!();
+            }
         }
     }
 
     pub fn parse_bool_lit(&mut self) -> ast::BoolLit {
-        match self.eat().typ {
+        let tok = self.eat();
+        match tok.typ {
             Type::Boolean(val) => ast::BoolLit { val },
-            _ => panic!("Not a boolean"),
+            _ => {
+                self.panic(
+                    format!("{} is not a boolean", tok),
+                    ErrorCode::IncorrectParsingType,
+                );
+                panic!();
+            }
         }
     }
 
@@ -102,7 +130,10 @@ impl Parser {
             Type::If => self.parse_if_stmt(),
             Type::While => self.parse_while_loop(),
             Type::Do => self.parse_do_while_loop(),
-            _ => panic!("Not a valid statement: {}", tok.typ),
+            _ => {
+                self.panic("Invalid statement".to_owned(), ErrorCode::InvalidStatement);
+                panic!();
+            }
         }
     }
 
@@ -204,7 +235,13 @@ impl Parser {
             Type::Identifier(_) => Expr::Ident(self.parse_ident()),
             Type::Number(_) => Expr::NumLit(self.parse_num_lit()),
             Type::Boolean(_) => Expr::BoolLit(self.parse_bool_lit()),
-            _ => panic!("Invalid expression"),
+            _ => {
+                self.panic(
+                    "Invalid expression".to_owned(),
+                    ErrorCode::InvalidExpression,
+                );
+                panic!();
+            }
         };
 
         expr
