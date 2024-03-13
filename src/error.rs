@@ -15,7 +15,7 @@ fn size(num: u32) -> usize {
     num.to_string().len()
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ErrorCode {
     Unknown,
     UnexpectedToken,
@@ -54,7 +54,7 @@ impl Error {
         let num_size = size(row + 1);
 
         let mut err = String::new();
-        err += &format!("E{:0>4}:\n", self.id);
+        err += &format!("E{:0>4} {}:\n", self.id as u32, self.id);
         for idx in (i32::max(row as i32 - 4, 0) as u32)..=row {
             let line_num = idx + 1;
             err += &format!("{}. {}", line_num, " ".repeat(num_size - size(line_num)));

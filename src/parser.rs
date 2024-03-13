@@ -8,14 +8,17 @@ use crate::tokens::{Token, Type, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATO
 pub struct Parser {
     lines: Rc<Vec<String>>,
     tokens: Vec<Token>,
+    prog: Vec<Stmt>,
     idx: usize,
 }
 
+// Parsing
 impl Parser {
     pub fn new(source: Rc<String>, tokens: &Vec<Token>) -> Parser {
         Parser {
             lines: Rc::new(source.split("\n").map(|s| s.to_owned()).collect()),
             tokens: tokens.clone(),
+            prog: Vec::new(),
             idx: 0,
         }
     }
@@ -258,7 +261,7 @@ impl Parser {
     }
 
     pub fn parse(&mut self) {
-        println!("{}", "-".to_owned().repeat(100));
+        println!("{}.", ". ".to_owned().repeat(60));
 
         let mut stmts: Vec<Stmt> = Vec::new();
         while self.tt() != Type::EOF {
@@ -270,6 +273,13 @@ impl Parser {
             stmts.push(self.parse_stmt());
         }
 
-        println!("{}", format!("{:#?}", stmts).replace("  ", " "));
+        self.prog = stmts;
+    }
+
+    pub fn print(&self) {
+        println!("{}", format!("{:#?}", self.prog).replace("  ", " "));
     }
 }
+
+// Typing checking
+impl Parser {}

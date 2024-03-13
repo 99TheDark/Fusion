@@ -2,6 +2,7 @@ use core::fmt;
 
 use crate::location::Location;
 
+// Types
 #[derive(PartialEq, Debug, Clone)]
 pub enum Type {
     Identifier(String),
@@ -141,6 +142,7 @@ impl Type {
     }
 }
 
+// Constants
 pub const SYMBOLS: &[Type] = &[
     Type::Whitespace,
     Type::NewLine,
@@ -227,6 +229,7 @@ pub const ORDERED_UNARY_OPERATORS: &[Type] = &[
     Type::Subtraction,
 ];
 
+// Tokens
 #[derive(Debug, Clone)]
 pub struct Token {
     pub loc: Location,
