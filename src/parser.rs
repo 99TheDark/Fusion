@@ -179,6 +179,7 @@ impl Parser {
             Type::If => self.parse_if_stmt(),
             Type::While => self.parse_while_loop(),
             Type::Do => self.parse_do_while_loop(),
+            Type::Return => self.parse_return(),
             Type::Function => self.parse_func(),
             _ => {
                 self.panic("Invalid statement".to_owned(), ErrorCode::InvalidStatement);
@@ -272,6 +273,19 @@ impl Parser {
             start,
             self.prev_stop(),
         ))
+    }
+
+    pub fn parse_return(&mut self) -> Stmt {
+        let start = self.cur_loc();
+
+        self.eat();
+        let val = if self.tt().is_line_ending() {
+            None
+        } else {
+            Some(Box::new(self.parse_expr()))
+        };
+
+        Stmt::Return(Meta::new(ast::Return { val }, start, self.prev_stop()))
     }
 
     pub fn parse_func(&mut self) -> Stmt {

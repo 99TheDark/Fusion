@@ -14,8 +14,8 @@
 | Break | Break |
 | Break | Break, Label |
 | Continue | Continue |
-| Return | Return |
-| Return | Return, Expr |
+| Return | Return | ✓ |
+| Return | Return, Expr | ✓ |
 | Decl | Let, Ident, Assignment, Expr | ✓ |
 | Decl | Let, Ident, Colon, Ident, Assignment, Expr | ✓ |
 | Assign | Ident, Assignment, Expr |

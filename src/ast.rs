@@ -37,6 +37,7 @@ pub enum Stmt {
     WhileLoop(Meta<WhileLoop>),
     DoWhileLoop(Meta<DoWhileLoop>),
     Func(Meta<Func>),
+    Return(Meta<Return>),
 }
 
 #[derive(Debug)]
@@ -76,6 +77,11 @@ pub struct Func {
     pub ret: Option<Box<Ident>>,
     pub body: Box<Scope>,
     // TODO: Add ID, like Expr::Ident
+}
+
+#[derive(Debug)]
+pub struct Return {
+    pub val: Option<Box<Expr>>,
 }
 
 // Expressions
