@@ -1,4 +1,5 @@
 use core::fmt;
+use std::mem::Discriminant;
 
 use crate::location::Location;
 
@@ -52,6 +53,7 @@ pub enum Type {
     Break,
     Continue,
     Return,
+    Comma,
     Function,
     Class,
     Public,
@@ -119,6 +121,7 @@ impl Type {
                     Type::Break => "break",
                     Type::Continue => "continue",
                     Type::Return => "return",
+                    Type::Comma => ",",
                     Type::Function => "func",
                     Type::Class => "class",
                     Type::Public => "pub",
@@ -136,11 +139,19 @@ impl Type {
 
     pub fn is(&self, types: &[Type]) -> bool {
         for typ in types {
-            if self == typ {
+            if self.eq(typ) {
                 return true;
             }
         }
         false
+    }
+
+    pub fn disc(&self) -> Discriminant<Type> {
+        std::mem::discriminant(self)
+    }
+
+    pub fn eq(&self, typ: &Type) -> bool {
+        self.disc() == typ.disc()
     }
 
     pub fn is_line_ending(self) -> bool {
@@ -185,6 +196,7 @@ pub const SYMBOLS: &[Type] = &[
     Type::CountLeadingZeros,
     Type::CountTrailingZeros,
     Type::Colon,
+    Type::Comma,
 ];
 
 pub const KEYWORDS: &[Type] = &[
@@ -196,6 +208,9 @@ pub const KEYWORDS: &[Type] = &[
     Type::For,
     Type::While,
     Type::Do,
+    Type::Break,
+    Type::Continue,
+    Type::Return,
     Type::Function,
     Type::Class,
     Type::Public,

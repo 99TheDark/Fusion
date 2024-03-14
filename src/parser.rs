@@ -1,9 +1,10 @@
+use std::collections::btree_map::Keys;
 use std::rc::Rc;
 
 use crate::ast::{self, Expr, Meta, Stmt};
 use crate::error::{Error, ErrorCode};
 use crate::location::Location;
-use crate::tokens::{Token, Type, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS};
+use crate::tokens::{Token, Type, KEYWORDS, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS};
 
 pub struct Parser {
     lines: Rc<Vec<String>>,
@@ -14,6 +15,7 @@ pub struct Parser {
 
 // Parsing
 impl Parser {
+    // TODO: Make all methods private
     pub fn new(source: Rc<String>, tokens: &Vec<Token>) -> Parser {
         Parser {
             lines: Rc::new(source.split("\n").map(|s| s.to_owned()).collect()),
@@ -55,7 +57,7 @@ impl Parser {
 
     pub fn expect(&mut self, expected: Type) -> Token {
         let tok = self.at();
-        if tok.typ != expected {
+        if !tok.typ.eq(&expected) {
             self.panic(
                 format!("Expected {}, instead got {}", expected, tok.typ.to_string()),
                 ErrorCode::UnexpectedToken,
@@ -64,6 +66,21 @@ impl Parser {
 
         self.idx += 1;
         tok
+    }
+
+    pub fn expect_ident(&mut self) -> ast::Ident {
+        let tok = self.at();
+        if tok.typ.is(KEYWORDS) {
+            self.panic(
+                format!(
+                    "Cannot use {} for a name, because it is a reserved keyword",
+                    tok.typ.src_strings().get(0).unwrap(),
+                ),
+                ErrorCode::ReservedNameUsed,
+            );
+        }
+
+        self.parse_ident()
     }
 
     pub fn panic(&self, message: String, id: ErrorCode) {
@@ -75,6 +92,18 @@ impl Parser {
             id,
         )
         .panic();
+    }
+
+    // Misc
+    pub fn parse_param(&mut self) -> ast::Param {
+        let name = self.expect_ident();
+        self.expect(Type::Colon);
+        let annot = self.expect_ident();
+
+        ast::Param {
+            name: Box::new(name),
+            annot: Box::new(annot),
+        }
     }
 
     // Raw parses
@@ -94,8 +123,18 @@ impl Parser {
         ast::Scope { stmts }
     }
 
+    pub fn parse_list<T>(&mut self, parse: fn() -> T) -> Vec<T> {
+        let mut vals = vec![parse()];
+        while self.tt() == Type::Comma {
+            self.eat();
+            vals.push(parse())
+        }
+
+        vals
+    }
+
     pub fn parse_ident(&mut self) -> ast::Ident {
-        let tok = self.eat();
+        let tok = self.expect(Type::Identifier("".to_string()));
         match tok.typ {
             Type::Identifier(name) => ast::Ident { name },
             _ => {
@@ -145,6 +184,7 @@ impl Parser {
             Type::If => self.parse_if_stmt(),
             Type::While => self.parse_while_loop(),
             Type::Do => self.parse_do_while_loop(),
+            Type::Function => self.parse_func(),
             _ => {
                 self.panic("Invalid statement".to_owned(), ErrorCode::InvalidStatement);
                 panic!();
@@ -237,6 +277,25 @@ impl Parser {
             ast::DoWhileLoop {
                 body: Box::new(body),
                 cond: Box::new(cond),
+            },
+            start,
+            self.prev_stop(),
+        ))
+    }
+
+    pub fn parse_func(&mut self) -> Stmt {
+        let start = self.cur_loc();
+
+        self.eat();
+        let name = self.expect_ident();
+        self.expect(Type::LeftParen);
+
+        Stmt::Func(Meta::new(
+            ast::Func {
+                name: Box::new(name),
+                args: Vec::new(),
+                ret: None,
+                body: Box::new(ast::Scope { stmts: Vec::new() }),
             },
             start,
             self.prev_stop(),

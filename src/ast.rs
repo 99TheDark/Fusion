@@ -73,7 +73,7 @@ pub struct DoWhileLoop {
 pub struct Func {
     pub name: Box<Ident>,
     pub args: Vec<Box<Param>>,
-    pub ret: Box<Ident>,
+    pub ret: Option<Box<Ident>>,
     pub body: Box<Scope>,
     // TODO: Add ID, like Expr::Ident
 }

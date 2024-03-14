@@ -22,6 +22,7 @@ pub enum ErrorCode {
     IncorrectParsingType,
     InvalidStatement,
     InvalidExpression,
+    ReservedNameUsed,
 }
 
 impl fmt::Display for ErrorCode {
