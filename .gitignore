@@ -1,5 +1,6 @@
 /target
-.DS_Store
-.DS_Store?
 /.vscode
 /background
+/test_docs
+.DS_Store
+.DS_Store?

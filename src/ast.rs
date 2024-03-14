@@ -22,6 +22,12 @@ impl<T> Meta<T> {
     }
 }
 
+#[derive(Debug)]
+pub struct Param {
+    pub name: Box<Ident>,
+    pub annot: Box<Ident>,
+}
+
 // Statements
 #[derive(Debug)]
 pub enum Stmt {
@@ -30,6 +36,7 @@ pub enum Stmt {
     IfStmt(Meta<IfStmt>),
     WhileLoop(Meta<WhileLoop>),
     DoWhileLoop(Meta<DoWhileLoop>),
+    Func(Meta<Func>),
 }
 
 #[derive(Debug)]
@@ -60,6 +67,15 @@ pub struct WhileLoop {
 pub struct DoWhileLoop {
     pub body: Box<Scope>,
     pub cond: Box<Expr>,
+}
+
+#[derive(Debug)]
+pub struct Func {
+    pub name: Box<Ident>,
+    pub args: Vec<Box<Param>>,
+    pub ret: Box<Ident>,
+    pub body: Box<Scope>,
+    // TODO: Add ID, like Expr::Ident
 }
 
 // Expressions
