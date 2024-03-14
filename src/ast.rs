@@ -1,5 +1,6 @@
 use crate::location::Location;
 use crate::tokens::Type;
+use crate::types::DataType;
 
 // TODO: Implement for stmts and exprs
 #[derive(Debug)]
@@ -7,11 +8,17 @@ pub struct Meta<T> {
     pub src: T,
     pub start: Location,
     pub end: Location,
+    pub typ: Option<DataType>,
 }
 
 impl<T> Meta<T> {
     pub fn new(src: T, start: Location, end: Location) -> Meta<T> {
-        Meta { src, start, end }
+        Meta {
+            src,
+            start,
+            end,
+            typ: None,
+        }
     }
 }
 

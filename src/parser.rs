@@ -330,6 +330,3 @@ impl Parser {
         println!("{}", format!("{:#?}", self.prog).replace("  ", " "));
     }
 }
-
-// Typing checking
-impl Parser {}
