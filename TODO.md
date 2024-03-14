@@ -1,6 +1,9 @@
 # TODO
-- Function parsing
 - Type Checker
+- Split each file into multiple
+    - AST into misc, statements & expressions
+    - Parser into basic, raw, other, statements, expressions
+    - Tokens into token, types, and consts
 - Modes
     - Comments
     - Strings
