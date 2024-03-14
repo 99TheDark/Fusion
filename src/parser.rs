@@ -1,4 +1,3 @@
-use std::collections::btree_map::Keys;
 use std::rc::Rc;
 
 use crate::ast::{self, Expr, Meta, Stmt};
@@ -68,21 +67,6 @@ impl Parser {
         tok
     }
 
-    pub fn expect_ident(&mut self) -> ast::Ident {
-        let tok = self.at();
-        if tok.typ.is(KEYWORDS) {
-            self.panic(
-                format!(
-                    "Cannot use {} for a name, because it is a reserved keyword",
-                    tok.typ.src_strings().get(0).unwrap(),
-                ),
-                ErrorCode::ReservedNameUsed,
-            );
-        }
-
-        self.parse_ident()
-    }
-
     pub fn panic(&self, message: String, id: ErrorCode) {
         Error::new(
             Rc::clone(&self.lines),
@@ -96,9 +80,9 @@ impl Parser {
 
     // Misc
     pub fn parse_param(&mut self) -> ast::Param {
-        let name = self.expect_ident();
+        let name = self.parse_ident();
         self.expect(Type::Colon);
-        let annot = self.expect_ident();
+        let annot = self.parse_ident();
 
         ast::Param {
             name: Box::new(name),
@@ -123,17 +107,28 @@ impl Parser {
         ast::Scope { stmts }
     }
 
-    pub fn parse_list<T>(&mut self, parse: fn() -> T) -> Vec<T> {
-        let mut vals = vec![parse()];
+    pub fn parse_list<T>(&mut self, parse: fn(&mut Self) -> T) -> Vec<Box<T>> {
+        let mut vals = vec![Box::new(parse(self))];
         while self.tt() == Type::Comma {
             self.eat();
-            vals.push(parse())
+            vals.push(Box::new(parse(self)));
         }
 
         vals
     }
 
     pub fn parse_ident(&mut self) -> ast::Ident {
+        let cur_tok = self.at();
+        if cur_tok.typ.is(KEYWORDS) {
+            self.panic(
+                format!(
+                    "Cannot use {} for a name, because it is a reserved keyword",
+                    cur_tok.typ.src_strings().get(0).unwrap(),
+                ),
+                ErrorCode::ReservedNameUsed,
+            );
+        }
+
         let tok = self.expect(Type::Identifier("".to_string()));
         match tok.typ {
             Type::Identifier(name) => ast::Ident { name },
@@ -195,13 +190,9 @@ impl Parser {
 
     pub fn parse_scope_stmt(&mut self) -> Stmt {
         let start = self.cur_loc();
+        let scope = self.parse_scope();
 
-        let mut stmts: Vec<Box<Stmt>> = Vec::new();
-        while self.tt() != Type::RightBrace {
-            stmts.push(Box::new(self.parse_stmt()));
-        }
-
-        Stmt::Scope(Meta::new(ast::Scope { stmts }, start, self.prev_stop()))
+        Stmt::Scope(Meta::new(scope, start, self.prev_stop()))
     }
 
     pub fn parse_decl(&mut self) -> Stmt {
@@ -287,14 +278,24 @@ impl Parser {
         let start = self.cur_loc();
 
         self.eat();
-        let name = self.expect_ident();
+        let name = self.parse_ident();
+
         self.expect(Type::LeftParen);
+        let args = self.parse_list(Parser::parse_param);
+        self.expect(Type::RightParen);
+
+        let ret = if self.tt() == Type::Colon {
+            self.eat();
+            Some(Box::new(self.parse_ident()))
+        } else {
+            None
+        };
 
         Stmt::Func(Meta::new(
             ast::Func {
                 name: Box::new(name),
-                args: Vec::new(),
-                ret: None,
+                args,
+                ret,
                 body: Box::new(ast::Scope { stmts: Vec::new() }),
             },
             start,
