@@ -4,7 +4,7 @@ use crate::{
     ast::{self, Expr, Node, Stmt},
     error::{Error, ErrorCode},
     program::Program,
-    types::DataType,
+    types::{self, DataType},
 };
 
 // TODO: Implement
@@ -36,18 +36,29 @@ impl Checker {
 
     fn check_decl(&mut self, decl: &ast::Decl) {
         let val = self.check_expr(&decl.val);
-        if decl
-            .annot
-            .as_ref()
-            .is_some_and(|a| a.src.name == val.to_string())
-        {
-            println!("{}", val.to_string());
-        }
+        match &decl.annot {
+            Some(annot) => {
+                let (annot_typ, val_typ) = (annot.src.name.clone(), val.to_string());
+                if annot_typ != val_typ {
+                    self.panic(
+                        format!(
+                            "'{}' is defined to be type {}, but assigned {}",
+                            decl.name.src.name, annot_typ, val_typ,
+                        ),
+                        &decl.val,
+                        ErrorCode::TypeMismatch,
+                    )
+                }
+            }
+            None => (),
+        };
     }
 
     // Expressions
     fn check_expr(&mut self, node: &Node<Expr>) -> DataType {
         match &node.src {
+            Expr::NumLit(_) => types::Int::new(Some(32)), // Floats aren't real, they can't hurt you
+            Expr::BoolLit(_) => types::Bool::new(),
             _ => {
                 self.panic(
                     "Invalid expression".to_owned(),

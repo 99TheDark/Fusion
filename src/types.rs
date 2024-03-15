@@ -21,47 +21,63 @@ impl DataType {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Int {
-    pub size: u32,
-    pub val: i32,
+    pub size: Option<u32>,
 }
 
 impl Int {
+    pub fn new(size: Option<u32>) -> DataType {
+        DataType::Int(Int { size })
+    }
+
     pub fn eq(&self, x: Int) -> bool {
         self.size == x.size
     }
 
     pub fn to_string(&self) -> String {
-        format!("int{}", self.size)
+        match self.size {
+            Some(size) => format!("int{}", size),
+            None => "int".to_owned(),
+        }
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Uint {
-    pub size: u32,
-    pub val: u32,
+    pub size: Option<u32>,
 }
 
 impl Uint {
+    pub fn new(size: Option<u32>) -> DataType {
+        DataType::Uint(Uint { size })
+    }
+
     pub fn eq(&self, x: Uint) -> bool {
         self.size == x.size
     }
 
     pub fn to_string(&self) -> String {
-        format!("uint{}", self.size)
+        match self.size {
+            Some(size) => format!("uint{}", size),
+            None => "uint".to_owned(),
+        }
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Float {
-    pub size: u32,
-    pub val: f32,
+    pub size: Option<u32>,
 }
 
 impl Float {
+    pub fn new(size: Option<u32>) -> DataType {
+        DataType::Float(Float { size })
+    }
+
+    // Half-implemented, to work more on later :P
     pub fn from(src: String) -> Option<Float> {
         if &src[0..5] == "float" {
             println!("{}", &src[6..]);
-            Some(Float { size: 32, val: 0.0 })
+            Some(Float { size: Some(32) })
         } else {
             None
         }
@@ -72,19 +88,24 @@ impl Float {
     }
 
     pub fn to_string(&self) -> String {
-        format!("float{}", self.size)
+        match self.size {
+            Some(size) => format!("float{}", size),
+            None => "float".to_string(),
+        }
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Bool {
-    pub val: bool,
-}
+pub struct Bool {}
 
 impl Bool {
+    pub fn new() -> DataType {
+        DataType::Bool(Bool {})
+    }
+
     pub fn from(src: String) -> Option<Bool> {
         if src == "bool" {
-            Some(Bool { val: false })
+            Some(Bool {})
         } else {
             None
         }
@@ -97,11 +118,18 @@ impl Bool {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Array {
-    pub typ: Box<DataType>,
+    pub typ: Option<Box<DataType>>,
 }
 
 impl Array {
+    pub fn new(typ: Option<Box<DataType>>) -> DataType {
+        DataType::Array(Array { typ })
+    }
+
     pub fn to_string(&self) -> String {
-        format!("{}[]", self.typ.to_string())
+        match &self.typ {
+            Some(typ) => format!("{}[]", typ.to_string()),
+            None => "[]".to_owned(),
+        }
     }
 }
