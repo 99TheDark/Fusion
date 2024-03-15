@@ -3,22 +3,23 @@ use std::rc::Rc;
 use crate::ast::{self, Expr, Meta, Stmt};
 use crate::error::{Error, ErrorCode};
 use crate::location::Location;
+use crate::program::Program;
 use crate::tokens::{Token, Type, KEYWORDS, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS};
 
 pub struct Parser {
-    lines: Rc<Vec<String>>,
-    tokens: Vec<Token>,
-    prog: Vec<Stmt>,
+    pub lines: Rc<Vec<String>>,
+    pub tokens: Vec<Token>,
+    pub prog: Program,
     idx: usize,
 }
 
 // Parsing
 impl Parser {
-    pub fn new(source: Rc<String>, tokens: &Vec<Token>) -> Parser {
+    pub fn new(lines: Rc<Vec<String>>, tokens: &Vec<Token>) -> Parser {
         Parser {
-            lines: Rc::new(source.split("\n").map(|s| s.to_owned()).collect()),
+            lines,
             tokens: tokens.clone(),
-            prog: Vec::new(),
+            prog: Program::new(),
             idx: 0,
         }
     }
@@ -386,20 +387,16 @@ impl Parser {
     pub fn parse(&mut self) {
         println!("{}.", ". ".to_owned().repeat(60));
 
-        let mut stmts: Vec<Stmt> = Vec::new();
+        let mut prog = Program::new();
         while self.tt() != Type::EOF {
             if self.tt().is_line_ending() {
                 self.eat();
                 continue;
             }
 
-            stmts.push(self.parse_stmt());
+            prog.stmts.push(Box::new(self.parse_stmt()));
         }
 
-        self.prog = stmts;
-    }
-
-    pub fn print(&self) {
-        println!("{}", format!("{:#?}", self.prog).replace("  ", " "));
+        self.prog = prog;
     }
 }

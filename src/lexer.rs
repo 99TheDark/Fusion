@@ -137,3 +137,7 @@ impl Lexer {
             .collect()
     }
 }
+
+pub fn source_lines(source: Rc<String>) -> Rc<Vec<String>> {
+    Rc::new(source.split("\n").map(|s| s.to_owned()).collect())
+}
