@@ -8,6 +8,17 @@ pub enum DataType {
 }
 
 impl DataType {
+    pub fn eq(&self, x: &DataType) -> bool {
+        match (self, x) {
+            (DataType::Int(x), DataType::Int(y)) => x.eq(y),
+            (DataType::Uint(x), DataType::Uint(y)) => x.eq(y),
+            (DataType::Float(x), DataType::Float(y)) => x.eq(y),
+            (DataType::Bool(_), DataType::Bool(_)) => true,
+            (DataType::Array(x), DataType::Array(y)) => x.eq(y),
+            _ => false,
+        }
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             DataType::Int(x) => x.to_string(),
@@ -29,7 +40,7 @@ impl Int {
         DataType::Int(Int { size })
     }
 
-    pub fn eq(&self, x: Int) -> bool {
+    pub fn eq(&self, x: &Int) -> bool {
         self.size == x.size
     }
 
@@ -51,7 +62,7 @@ impl Uint {
         DataType::Uint(Uint { size })
     }
 
-    pub fn eq(&self, x: Uint) -> bool {
+    pub fn eq(&self, x: &Uint) -> bool {
         self.size == x.size
     }
 
@@ -83,7 +94,7 @@ impl Float {
         }
     }
 
-    pub fn eq(&self, x: Float) -> bool {
+    pub fn eq(&self, x: &Float) -> bool {
         self.size == x.size
     }
 
@@ -124,6 +135,10 @@ pub struct Array {
 impl Array {
     pub fn new(typ: Option<Box<DataType>>) -> DataType {
         DataType::Array(Array { typ })
+    }
+
+    pub fn eq(&self, x: &Array) -> bool {
+        self.typ.eq(&x.typ)
     }
 
     pub fn to_string(&self) -> String {

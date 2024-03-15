@@ -1,5 +1,5 @@
 # TODO
-- Type Checker (In progress)
+- Swap `Some(size)` + `None` with automatic type casting
 - Identifier-starting statements, like assignments, function calls and type conversions
 - Split each file into multiple
     - AST into misc, statements & expressions

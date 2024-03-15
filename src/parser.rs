@@ -307,12 +307,12 @@ impl Parser {
 
             let mut left = self.parse_binop(Some(idx + 1));
             while self.tt().is(ORDERED_BINARY_OPERATORS[idx]) {
-                let op = self.eat().typ;
+                let op = self.eat();
                 let binop = self.parse_binop(Some(idx + 1));
 
                 left = self.node(
                     Expr::BinaryOp(ast::BinaryOp {
-                        op,
+                        op: Meta::new(op.typ, op.start, op.end),
                         lhs: left,
                         rhs: binop,
                     }),
@@ -330,10 +330,16 @@ impl Parser {
         if self.tt().is(ORDERED_UNARY_OPERATORS) {
             let start = self.cur_loc();
 
-            let op = self.eat().typ;
+            let op = self.eat();
             let val = self.parse_primary();
 
-            self.node(Expr::UnaryOp(ast::UnaryOp { op, val }), start)
+            self.node(
+                Expr::UnaryOp(ast::UnaryOp {
+                    op: Meta::new(op.typ, op.start, op.end),
+                    val,
+                }),
+                start,
+            )
         } else {
             self.parse_primary()
         }

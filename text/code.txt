@@ -1,2 +1,2 @@
 let x = 51
-let y: int32 = true
+let y: int32 = true | 1

@@ -24,6 +24,7 @@ impl<T> Meta<T> {
 
 pub type Node<T> = Box<Meta<T>>;
 
+// Partial
 #[derive(Debug, Clone)]
 pub struct Param {
     pub name: Node<Ident>,
@@ -114,13 +115,13 @@ pub struct BoolLit {
 
 #[derive(Debug, Clone)]
 pub struct BinaryOp {
-    pub op: Type,
+    pub op: Meta<Type>,
     pub lhs: Node<Expr>,
     pub rhs: Node<Expr>,
 }
 
 #[derive(Debug, Clone)]
 pub struct UnaryOp {
-    pub op: Type,
+    pub op: Meta<Type>,
     pub val: Node<Expr>,
 }

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
-    ast::{self, Expr, Node, Stmt},
+    ast::{self, Expr, Meta, Node, Stmt},
     error::{Error, ErrorCode},
     program::Program,
     types::{self, DataType},
@@ -18,7 +18,7 @@ impl Checker {
         Checker { lines, prog }
     }
 
-    fn panic<T>(&self, message: String, node: &Node<T>, id: ErrorCode) {
+    fn panic<T>(&self, message: String, node: &Meta<T>, id: ErrorCode) {
         Error::new(Rc::clone(&self.lines), message, node.start, node.end, id).panic();
     }
 
@@ -57,8 +57,9 @@ impl Checker {
     // Expressions
     fn check_expr(&mut self, node: &Node<Expr>) -> DataType {
         match &node.src {
-            Expr::NumLit(_) => types::Int::new(Some(32)), // Floats aren't real, they can't hurt you
+            Expr::NumLit(_) => types::Int::new(None), // Floats aren't real, they can't hurt you
             Expr::BoolLit(_) => types::Bool::new(),
+            Expr::BinaryOp(binop) => self.check_binop(binop),
             _ => {
                 self.panic(
                     "Invalid expression".to_owned(),
@@ -68,6 +69,26 @@ impl Checker {
                 panic!()
             }
         }
+    }
+
+    fn check_binop(&mut self, binop: &ast::BinaryOp) -> DataType {
+        let left_typ = self.check_expr(&binop.lhs);
+        let right_typ = self.check_expr(&binop.rhs);
+
+        if !left_typ.eq(&right_typ) {
+            self.panic(
+                format!(
+                    "Cannot use the {} operator on {} and {}",
+                    binop.op.src.src_strings().get(0).unwrap(),
+                    left_typ.to_string(),
+                    right_typ.to_string(),
+                ),
+                &binop.op,
+                ErrorCode::TypeMismatch,
+            )
+        }
+
+        left_typ // Since left_typ == right_typ
     }
 
     pub fn check(&mut self) {
