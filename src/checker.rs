@@ -60,6 +60,7 @@ impl Checker {
             Expr::NumLit(_) => types::Int::new(None), // Floats aren't real, they can't hurt you
             Expr::BoolLit(_) => types::Bool::new(),
             Expr::BinaryOp(binop) => self.check_binop(binop),
+            Expr::UnaryOp(unop) => self.check_unop(unop),
             _ => {
                 self.panic(
                     "Invalid expression".to_owned(),
@@ -89,6 +90,11 @@ impl Checker {
         }
 
         left_typ // Since left_typ == right_typ
+    }
+
+    fn check_unop(&mut self, unop: &ast::UnaryOp) -> DataType {
+        let typ = self.check_expr(&unop.val);
+        typ
     }
 
     pub fn check(&mut self) {
