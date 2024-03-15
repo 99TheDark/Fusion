@@ -3,7 +3,7 @@ use crate::tokens::Type;
 use crate::types::DataType;
 
 // TODO: Implement for stmts and exprs
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Meta<T> {
     pub src: T,
     pub start: Location,
@@ -22,103 +22,105 @@ impl<T> Meta<T> {
     }
 }
 
-#[derive(Debug)]
+pub type Node<T> = Box<Meta<T>>;
+
+#[derive(Debug, Clone)]
 pub struct Param {
-    pub name: Box<Ident>,
-    pub annot: Box<Ident>,
+    pub name: Node<Ident>,
+    pub annot: Node<Ident>,
 }
 
 // Statements
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Stmt {
-    Scope(Meta<Scope>),
-    Decl(Meta<Decl>),
-    IfStmt(Meta<IfStmt>),
-    WhileLoop(Meta<WhileLoop>),
-    DoWhileLoop(Meta<DoWhileLoop>),
-    Func(Meta<Func>),
-    Return(Meta<Return>),
+    Scope(Scope),
+    Decl(Decl),
+    IfStmt(IfStmt),
+    WhileLoop(WhileLoop),
+    DoWhileLoop(DoWhileLoop),
+    Func(Func),
+    Return(Return),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Scope {
-    pub stmts: Vec<Box<Stmt>>,
+    pub stmts: Vec<Node<Stmt>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Decl {
-    pub name: Box<Ident>,
-    pub annot: Option<Box<Ident>>,
-    pub val: Box<Expr>,
+    pub name: Node<Ident>,
+    pub annot: Option<Node<Ident>>,
+    pub val: Node<Expr>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct IfStmt {
-    pub cond: Box<Expr>,
-    pub body: Box<Scope>,
+    pub cond: Node<Expr>,
+    pub body: Node<Scope>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WhileLoop {
-    pub cond: Box<Expr>,
-    pub body: Box<Scope>,
+    pub cond: Node<Expr>,
+    pub body: Node<Scope>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DoWhileLoop {
-    pub body: Box<Scope>,
-    pub cond: Box<Expr>,
+    pub body: Node<Scope>,
+    pub cond: Node<Expr>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Func {
-    pub name: Box<Ident>,
-    pub args: Vec<Box<Param>>,
-    pub ret: Option<Box<Ident>>,
-    pub body: Box<Scope>,
+    pub name: Node<Ident>,
+    pub args: Vec<Node<Param>>,
+    pub ret: Option<Node<Ident>>,
+    pub body: Node<Scope>,
     // TODO: Add ID, like Expr::Ident
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Return {
-    pub val: Option<Box<Expr>>,
+    pub val: Option<Node<Expr>>,
 }
 
 // Expressions
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expr {
-    Ident(Meta<Ident>),
-    NumLit(Meta<NumLit>),
-    BoolLit(Meta<BoolLit>),
-    BinaryOp(Meta<BinaryOp>),
-    UnaryOp(Meta<UnaryOp>),
+    Ident(Ident),
+    NumLit(NumLit),
+    BoolLit(BoolLit),
+    BinaryOp(BinaryOp),
+    UnaryOp(UnaryOp),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ident {
     pub name: String,
     // TODO: Add ID
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NumLit {
     pub val: f32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BoolLit {
     pub val: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BinaryOp {
     pub op: Type,
-    pub lhs: Box<Expr>,
-    pub rhs: Box<Expr>,
+    pub lhs: Node<Expr>,
+    pub rhs: Node<Expr>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnaryOp {
     pub op: Type,
-    pub val: Box<Expr>,
+    pub val: Node<Expr>,
 }

@@ -1,8 +1,8 @@
-use crate::ast::Stmt;
+use crate::ast::{Node, Stmt};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Program {
-    pub stmts: Vec<Box<Stmt>>,
+    pub stmts: Vec<Node<Stmt>>,
 }
 
 impl Program {

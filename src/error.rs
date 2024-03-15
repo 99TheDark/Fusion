@@ -23,6 +23,7 @@ pub enum ErrorCode {
     InvalidStatement,
     InvalidExpression,
     ReservedNameUsed,
+    TypeMismatch,
 }
 
 impl fmt::Display for ErrorCode {

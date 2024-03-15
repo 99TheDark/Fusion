@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::ast::{self, Expr, Meta, Stmt};
+use crate::ast::{self, Expr, Meta, Node, Stmt};
 use crate::error::{Error, ErrorCode};
 use crate::location::Location;
 use crate::program::Program;
@@ -40,10 +40,6 @@ impl Parser {
         self.at().start
     }
 
-    fn cur_stop(&self) -> Location {
-        self.at().end
-    }
-
     fn prev_stop(&self) -> Location {
         self.prev().end
     }
@@ -72,52 +68,57 @@ impl Parser {
             Rc::clone(&self.lines),
             message,
             self.cur_loc(),
-            self.cur_loc().shift(self.at().size), // Later to use Metadata
+            self.cur_loc().shift(self.at().size), // TODO: Use Metadata
             id,
         )
         .panic();
     }
 
+    fn node<T>(&self, node: T, start: Location) -> Node<T> {
+        Box::new(Meta::new(node, start, self.prev_stop()))
+    }
+
     // Misc
-    fn parse_param(&mut self) -> ast::Param {
+    fn parse_param(&mut self) -> Node<ast::Param> {
+        let start = self.cur_loc();
+
         let name = self.parse_ident();
         self.expect(Type::Colon);
         let annot = self.parse_ident();
 
-        ast::Param {
-            name: Box::new(name),
-            annot: Box::new(annot),
-        }
+        self.node(ast::Param { name, annot }, start)
     }
 
-    // Raw parses
-    fn parse_scope(&mut self) -> ast::Scope {
+    fn parse_list<T>(&mut self, parse: fn(&mut Self) -> T) -> Vec<T> {
+        let mut vals = vec![parse(self)];
+        while self.tt() == Type::Comma {
+            self.eat();
+            vals.push(parse(self));
+        }
+
+        vals
+    }
+
+    fn parse_scope(&mut self) -> Node<ast::Scope> {
+        let start = self.cur_loc();
+
         self.expect(Type::LeftBrace);
-        let mut stmts: Vec<Box<Stmt>> = Vec::new();
+        let mut stmts: Vec<Node<Stmt>> = Vec::new();
         while self.tt() != Type::RightBrace {
             if self.tt().is_line_ending() {
                 self.eat();
                 continue;
             }
 
-            stmts.push(Box::new(self.parse_stmt()));
+            stmts.push(self.parse_stmt());
         }
         self.expect(Type::RightBrace);
 
-        ast::Scope { stmts }
+        self.node(ast::Scope { stmts }, start)
     }
 
-    fn parse_list<T>(&mut self, parse: fn(&mut Self) -> T) -> Vec<Box<T>> {
-        let mut vals = vec![Box::new(parse(self))];
-        while self.tt() == Type::Comma {
-            self.eat();
-            vals.push(Box::new(parse(self)));
-        }
-
-        vals
-    }
-
-    fn parse_ident(&mut self) -> ast::Ident {
+    // Raw parses
+    fn parse_raw_ident(&mut self) -> ast::Ident {
         let cur_tok = self.at();
         if cur_tok.typ.is(KEYWORDS) {
             self.panic(
@@ -142,7 +143,7 @@ impl Parser {
         }
     }
 
-    fn parse_num_lit(&mut self) -> ast::NumLit {
+    fn parse_raw_num_lit(&mut self) -> ast::NumLit {
         let tok = self.eat();
         match tok.typ {
             Type::Number(val) => ast::NumLit { val },
@@ -156,7 +157,7 @@ impl Parser {
         }
     }
 
-    fn parse_bool_lit(&mut self) -> ast::BoolLit {
+    fn parse_raw_bool_lit(&mut self) -> ast::BoolLit {
         let tok = self.eat();
         match tok.typ {
             Type::Boolean(val) => ast::BoolLit { val },
@@ -171,7 +172,7 @@ impl Parser {
     }
 
     // Statements
-    fn parse_stmt(&mut self) -> Stmt {
+    fn parse_stmt(&mut self) -> Node<Stmt> {
         let tok = self.at();
         match tok.typ {
             Type::LeftBrace => self.parse_scope_stmt(),
@@ -189,14 +190,12 @@ impl Parser {
         // TODO: Expect semicolon, newline or eof at the end of each statement
     }
 
-    fn parse_scope_stmt(&mut self) -> Stmt {
-        let start = self.cur_loc();
+    fn parse_scope_stmt(&mut self) -> Node<Stmt> {
         let scope = self.parse_scope();
-
-        Stmt::Scope(Meta::new(scope, start, self.prev_stop()))
+        self.node(Stmt::Scope(scope.src), scope.start)
     }
 
-    fn parse_decl(&mut self) -> Stmt {
+    fn parse_decl(&mut self) -> Node<Stmt> {
         let start = self.cur_loc();
 
         self.eat();
@@ -204,7 +203,7 @@ impl Parser {
 
         let annotation = if self.tt() == Type::Colon {
             self.eat();
-            Some(Box::new(self.parse_ident()))
+            Some(self.parse_ident())
         } else {
             None
         };
@@ -212,52 +211,37 @@ impl Parser {
         self.expect(Type::Assignment);
         let value = self.parse_expr();
 
-        Stmt::Decl(Meta::new(
-            ast::Decl {
-                name: Box::new(ident),
+        self.node(
+            Stmt::Decl(ast::Decl {
+                name: ident,
                 annot: annotation,
-                val: Box::new(value),
-            },
+                val: value,
+            }),
             start,
-            self.prev_stop(),
-        ))
+        )
     }
 
-    fn parse_if_stmt(&mut self) -> Stmt {
+    fn parse_if_stmt(&mut self) -> Node<Stmt> {
         let start = self.cur_loc();
 
         self.eat();
         let cond = self.parse_expr();
         let body = self.parse_scope();
 
-        Stmt::IfStmt(Meta::new(
-            ast::IfStmt {
-                cond: Box::new(cond),
-                body: Box::new(body),
-            },
-            start,
-            self.prev_stop(),
-        ))
+        self.node(Stmt::IfStmt(ast::IfStmt { cond, body }), start)
     }
 
-    fn parse_while_loop(&mut self) -> Stmt {
+    fn parse_while_loop(&mut self) -> Node<Stmt> {
         let start = self.cur_loc();
 
         self.eat();
         let cond = self.parse_expr();
         let body = self.parse_scope();
 
-        Stmt::WhileLoop(Meta::new(
-            ast::WhileLoop {
-                cond: Box::new(cond),
-                body: Box::new(body),
-            },
-            start,
-            self.prev_stop(),
-        ))
+        self.node(Stmt::WhileLoop(ast::WhileLoop { cond, body }), start)
     }
 
-    fn parse_do_while_loop(&mut self) -> Stmt {
+    fn parse_do_while_loop(&mut self) -> Node<Stmt> {
         let start = self.cur_loc();
 
         self.eat();
@@ -265,30 +249,23 @@ impl Parser {
         self.expect(Type::While);
         let cond = self.parse_expr();
 
-        Stmt::DoWhileLoop(Meta::new(
-            ast::DoWhileLoop {
-                body: Box::new(body),
-                cond: Box::new(cond),
-            },
-            start,
-            self.prev_stop(),
-        ))
+        self.node(Stmt::DoWhileLoop(ast::DoWhileLoop { body, cond }), start)
     }
 
-    fn parse_return(&mut self) -> Stmt {
+    fn parse_return(&mut self) -> Node<Stmt> {
         let start = self.cur_loc();
 
         self.eat();
         let val = if self.tt().is_line_ending() {
             None
         } else {
-            Some(Box::new(self.parse_expr()))
+            Some(self.parse_expr())
         };
 
-        Stmt::Return(Meta::new(ast::Return { val }, start, self.prev_stop()))
+        self.node(Stmt::Return(ast::Return { val }), start)
     }
 
-    fn parse_func(&mut self) -> Stmt {
+    fn parse_func(&mut self) -> Node<Stmt> {
         let start = self.cur_loc();
 
         self.eat();
@@ -300,29 +277,30 @@ impl Parser {
 
         let ret = if self.tt() == Type::Colon {
             self.eat();
-            Some(Box::new(self.parse_ident()))
+            Some(self.parse_ident())
         } else {
             None
         };
 
-        Stmt::Func(Meta::new(
-            ast::Func {
-                name: Box::new(name),
+        let body = self.parse_scope();
+
+        self.node(
+            Stmt::Func(ast::Func {
+                name,
                 args,
                 ret,
-                body: Box::new(ast::Scope { stmts: Vec::new() }),
-            },
+                body,
+            }),
             start,
-            self.prev_stop(),
-        ))
+        )
     }
 
     // Expressions
-    fn parse_expr(&mut self) -> Expr {
+    fn parse_expr(&mut self) -> Node<Expr> {
         self.parse_binop(None)
     }
 
-    fn parse_binop(&mut self, depth: Option<usize>) -> Expr {
+    fn parse_binop(&mut self, depth: Option<usize>) -> Node<Expr> {
         let idx = depth.unwrap_or(0);
         if idx < ORDERED_BINARY_OPERATORS.len() {
             let start = self.cur_loc();
@@ -330,16 +308,16 @@ impl Parser {
             let mut left = self.parse_binop(Some(idx + 1));
             while self.tt().is(ORDERED_BINARY_OPERATORS[idx]) {
                 let op = self.eat().typ;
+                let binop = self.parse_binop(Some(idx + 1));
 
-                left = Expr::BinaryOp(Meta::new(
-                    ast::BinaryOp {
+                left = self.node(
+                    Expr::BinaryOp(ast::BinaryOp {
                         op,
-                        lhs: Box::new(left),
-                        rhs: Box::new(self.parse_binop(Some(idx + 1))),
-                    },
+                        lhs: left,
+                        rhs: binop,
+                    }),
                     start,
-                    self.prev_stop(),
-                ));
+                );
             }
 
             left
@@ -348,32 +326,27 @@ impl Parser {
         }
     }
 
-    fn parse_unop(&mut self) -> Expr {
+    fn parse_unop(&mut self) -> Node<Expr> {
         if self.tt().is(ORDERED_UNARY_OPERATORS) {
             let start = self.cur_loc();
 
             let op = self.eat().typ;
-            let val = Box::new(self.parse_primary());
+            let val = self.parse_primary();
 
-            Expr::UnaryOp(Meta::new(ast::UnaryOp { op, val }, start, self.prev_stop()))
+            self.node(Expr::UnaryOp(ast::UnaryOp { op, val }), start)
         } else {
             self.parse_primary()
         }
     }
 
-    fn parse_primary(&mut self) -> Expr {
+    // Primaries
+    fn parse_primary(&mut self) -> Node<Expr> {
         let tok = self.at();
         let start = self.cur_loc();
-        match tok.typ {
-            Type::Identifier(_) => {
-                Expr::Ident(Meta::new(self.parse_ident(), start, self.cur_stop()))
-            }
-            Type::Number(_) => {
-                Expr::NumLit(Meta::new(self.parse_num_lit(), start, self.cur_stop()))
-            }
-            Type::Boolean(_) => {
-                Expr::BoolLit(Meta::new(self.parse_bool_lit(), start, self.cur_stop()))
-            }
+        let expr = match tok.typ {
+            Type::Identifier(_) => Expr::Ident(self.parse_raw_ident()),
+            Type::Number(_) => Expr::NumLit(self.parse_raw_num_lit()),
+            Type::Boolean(_) => Expr::BoolLit(self.parse_raw_bool_lit()),
             _ => {
                 self.panic(
                     format!("Invalid expression {}", tok.typ),
@@ -381,7 +354,15 @@ impl Parser {
                 );
                 panic!();
             }
-        }
+        };
+        self.node(expr, start)
+    }
+
+    fn parse_ident(&mut self) -> Node<ast::Ident> {
+        let start = self.cur_loc();
+        let raw = self.parse_raw_ident();
+
+        self.node(raw, start)
     }
 
     pub fn parse(&mut self) {
@@ -394,7 +375,7 @@ impl Parser {
                 continue;
             }
 
-            prog.stmts.push(Box::new(self.parse_stmt()));
+            prog.stmts.push(self.parse_stmt());
         }
 
         self.prog = prog;
