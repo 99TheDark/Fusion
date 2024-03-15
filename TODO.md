@@ -1,4 +1,5 @@
 # TODO
+- Identifier-starting statements, like assignments, function calls and type conversions
 - Type Checker
 - Split each file into multiple
     - AST into misc, statements & expressions

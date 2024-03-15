@@ -4,6 +4,7 @@ pub enum DataType {
     Uint(Uint),
     Float(Float),
     Bool(Bool),
+    Array(Box<DataType>),
 }
 
 #[derive(Debug)]

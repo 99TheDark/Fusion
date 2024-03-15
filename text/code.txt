@@ -1,4 +1,2 @@
-func add(a: int32, b: int32): int32 {
-    return a + b
-    return
-}
+let x = 5
+let y: int32 = 8

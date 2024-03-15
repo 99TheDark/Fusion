@@ -14,7 +14,6 @@ pub struct Parser {
 
 // Parsing
 impl Parser {
-    // TODO: Make all methods private
     pub fn new(source: Rc<String>, tokens: &Vec<Token>) -> Parser {
         Parser {
             lines: Rc::new(source.split("\n").map(|s| s.to_owned()).collect()),
@@ -24,37 +23,37 @@ impl Parser {
         }
     }
 
-    pub fn prev(&self) -> Token {
+    fn prev(&self) -> Token {
         self.tokens.get(self.idx - 1).unwrap().clone()
     }
 
-    pub fn at(&self) -> Token {
+    fn at(&self) -> Token {
         self.tokens.get(self.idx).unwrap().clone()
     }
 
-    pub fn tt(&self) -> Type {
+    fn tt(&self) -> Type {
         self.at().typ
     }
 
-    pub fn cur_loc(&self) -> Location {
+    fn cur_loc(&self) -> Location {
         self.at().start
     }
 
-    pub fn cur_stop(&self) -> Location {
+    fn cur_stop(&self) -> Location {
         self.at().end
     }
 
-    pub fn prev_stop(&self) -> Location {
+    fn prev_stop(&self) -> Location {
         self.prev().end
     }
 
-    pub fn eat(&mut self) -> Token {
+    fn eat(&mut self) -> Token {
         let tok = self.at();
         self.idx += 1;
         tok
     }
 
-    pub fn expect(&mut self, expected: Type) -> Token {
+    fn expect(&mut self, expected: Type) -> Token {
         let tok = self.at();
         if !tok.typ.eq(&expected) {
             self.panic(
@@ -67,7 +66,7 @@ impl Parser {
         tok
     }
 
-    pub fn panic(&self, message: String, id: ErrorCode) {
+    fn panic(&self, message: String, id: ErrorCode) {
         Error::new(
             Rc::clone(&self.lines),
             message,
@@ -79,7 +78,7 @@ impl Parser {
     }
 
     // Misc
-    pub fn parse_param(&mut self) -> ast::Param {
+    fn parse_param(&mut self) -> ast::Param {
         let name = self.parse_ident();
         self.expect(Type::Colon);
         let annot = self.parse_ident();
@@ -91,7 +90,7 @@ impl Parser {
     }
 
     // Raw parses
-    pub fn parse_scope(&mut self) -> ast::Scope {
+    fn parse_scope(&mut self) -> ast::Scope {
         self.expect(Type::LeftBrace);
         let mut stmts: Vec<Box<Stmt>> = Vec::new();
         while self.tt() != Type::RightBrace {
@@ -107,7 +106,7 @@ impl Parser {
         ast::Scope { stmts }
     }
 
-    pub fn parse_list<T>(&mut self, parse: fn(&mut Self) -> T) -> Vec<Box<T>> {
+    fn parse_list<T>(&mut self, parse: fn(&mut Self) -> T) -> Vec<Box<T>> {
         let mut vals = vec![Box::new(parse(self))];
         while self.tt() == Type::Comma {
             self.eat();
@@ -117,7 +116,7 @@ impl Parser {
         vals
     }
 
-    pub fn parse_ident(&mut self) -> ast::Ident {
+    fn parse_ident(&mut self) -> ast::Ident {
         let cur_tok = self.at();
         if cur_tok.typ.is(KEYWORDS) {
             self.panic(
@@ -142,7 +141,7 @@ impl Parser {
         }
     }
 
-    pub fn parse_num_lit(&mut self) -> ast::NumLit {
+    fn parse_num_lit(&mut self) -> ast::NumLit {
         let tok = self.eat();
         match tok.typ {
             Type::Number(val) => ast::NumLit { val },
@@ -156,7 +155,7 @@ impl Parser {
         }
     }
 
-    pub fn parse_bool_lit(&mut self) -> ast::BoolLit {
+    fn parse_bool_lit(&mut self) -> ast::BoolLit {
         let tok = self.eat();
         match tok.typ {
             Type::Boolean(val) => ast::BoolLit { val },
@@ -171,7 +170,7 @@ impl Parser {
     }
 
     // Statements
-    pub fn parse_stmt(&mut self) -> Stmt {
+    fn parse_stmt(&mut self) -> Stmt {
         let tok = self.at();
         match tok.typ {
             Type::LeftBrace => self.parse_scope_stmt(),
@@ -189,14 +188,14 @@ impl Parser {
         // TODO: Expect semicolon, newline or eof at the end of each statement
     }
 
-    pub fn parse_scope_stmt(&mut self) -> Stmt {
+    fn parse_scope_stmt(&mut self) -> Stmt {
         let start = self.cur_loc();
         let scope = self.parse_scope();
 
         Stmt::Scope(Meta::new(scope, start, self.prev_stop()))
     }
 
-    pub fn parse_decl(&mut self) -> Stmt {
+    fn parse_decl(&mut self) -> Stmt {
         let start = self.cur_loc();
 
         self.eat();
@@ -223,7 +222,7 @@ impl Parser {
         ))
     }
 
-    pub fn parse_if_stmt(&mut self) -> Stmt {
+    fn parse_if_stmt(&mut self) -> Stmt {
         let start = self.cur_loc();
 
         self.eat();
@@ -240,7 +239,7 @@ impl Parser {
         ))
     }
 
-    pub fn parse_while_loop(&mut self) -> Stmt {
+    fn parse_while_loop(&mut self) -> Stmt {
         let start = self.cur_loc();
 
         self.eat();
@@ -257,7 +256,7 @@ impl Parser {
         ))
     }
 
-    pub fn parse_do_while_loop(&mut self) -> Stmt {
+    fn parse_do_while_loop(&mut self) -> Stmt {
         let start = self.cur_loc();
 
         self.eat();
@@ -275,7 +274,7 @@ impl Parser {
         ))
     }
 
-    pub fn parse_return(&mut self) -> Stmt {
+    fn parse_return(&mut self) -> Stmt {
         let start = self.cur_loc();
 
         self.eat();
@@ -288,7 +287,7 @@ impl Parser {
         Stmt::Return(Meta::new(ast::Return { val }, start, self.prev_stop()))
     }
 
-    pub fn parse_func(&mut self) -> Stmt {
+    fn parse_func(&mut self) -> Stmt {
         let start = self.cur_loc();
 
         self.eat();
@@ -318,11 +317,11 @@ impl Parser {
     }
 
     // Expressions
-    pub fn parse_expr(&mut self) -> Expr {
+    fn parse_expr(&mut self) -> Expr {
         self.parse_binop(None)
     }
 
-    pub fn parse_binop(&mut self, depth: Option<usize>) -> Expr {
+    fn parse_binop(&mut self, depth: Option<usize>) -> Expr {
         let idx = depth.unwrap_or(0);
         if idx < ORDERED_BINARY_OPERATORS.len() {
             let start = self.cur_loc();
@@ -348,7 +347,7 @@ impl Parser {
         }
     }
 
-    pub fn parse_unop(&mut self) -> Expr {
+    fn parse_unop(&mut self) -> Expr {
         if self.tt().is(ORDERED_UNARY_OPERATORS) {
             let start = self.cur_loc();
 
@@ -361,7 +360,7 @@ impl Parser {
         }
     }
 
-    pub fn parse_primary(&mut self) -> Expr {
+    fn parse_primary(&mut self) -> Expr {
         let tok = self.at();
         let start = self.cur_loc();
         match tok.typ {
