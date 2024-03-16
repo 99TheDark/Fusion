@@ -10,7 +10,7 @@ use crate::{
 pub struct Parser {
     pub lines: Rc<Vec<String>>,
     pub tokens: Vec<Token>,
-    pub prog: ast::Scope,
+    pub prog: ast::Block,
     idx: usize,
 }
 
@@ -20,7 +20,7 @@ impl Parser {
         Parser {
             lines,
             tokens: tokens.clone(),
-            prog: ast::Scope { stmts: Vec::new() },
+            prog: ast::Block { stmts: Vec::new() },
             idx: 0,
         }
     }
@@ -108,7 +108,7 @@ impl Parser {
         body
     }
 
-    fn parse_scope(&mut self) -> Node<ast::Scope> {
+    fn parse_scope(&mut self) -> Node<ast::Block> {
         let start = self.cur_loc();
 
         self.expect(Type::LeftBrace);
@@ -123,7 +123,7 @@ impl Parser {
         }
         self.expect(Type::RightBrace);
 
-        self.node(ast::Scope { stmts }, start)
+        self.node(ast::Block { stmts }, start)
     }
 
     // Raw parses
@@ -202,8 +202,8 @@ impl Parser {
     }
 
     fn parse_scope_stmt(&mut self) -> Node<Stmt> {
-        let scope = self.parse_scope();
-        self.node(Stmt::Scope(scope.src), scope.start)
+        let block = self.parse_scope();
+        self.node(Stmt::Block(block.src), block.start)
     }
 
     fn parse_decl(&mut self) -> Node<Stmt> {

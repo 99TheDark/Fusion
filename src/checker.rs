@@ -8,11 +8,11 @@ use crate::{
 
 pub struct Checker {
     pub lines: Rc<Vec<String>>,
-    pub prog: ast::Scope,
+    pub prog: ast::Block,
 }
 
 impl Checker {
-    pub fn new(lines: Rc<Vec<String>>, prog: ast::Scope) -> Checker {
+    pub fn new(lines: Rc<Vec<String>>, prog: ast::Block) -> Checker {
         Checker { lines, prog }
     }
 
@@ -34,7 +34,7 @@ impl Checker {
     // Statements
     fn check_stmt(&mut self, node: &mut Node<Stmt>) {
         match &mut node.src {
-            Stmt::Scope(ref mut x) => self.check_scope(x),
+            Stmt::Block(ref mut x) => self.check_scope(x),
             Stmt::Decl(ref mut x) => self.check_decl(x),
             Stmt::IfStmt(ref mut x) => self.check_if_stmt(x),
             Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
@@ -48,8 +48,8 @@ impl Checker {
         }
     }
 
-    fn check_scope(&mut self, scope: &mut ast::Scope) {
-        for stmt in &mut scope.stmts {
+    fn check_scope(&mut self, block: &mut ast::Block) {
+        for stmt in &mut block.stmts {
             self.check_stmt(stmt);
         }
     }
@@ -136,7 +136,7 @@ impl Checker {
 
     pub fn check(&mut self) {
         // Gotta figure out a better way of doing this
-        let mut prog = ast::Scope { stmts: Vec::new() };
+        let mut prog = ast::Block { stmts: Vec::new() };
         for stmt in &mut self.prog.stmts.clone().iter_mut() {
             self.check_stmt(stmt);
             prog.stmts.push(stmt.clone());

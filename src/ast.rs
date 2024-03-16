@@ -33,7 +33,7 @@ pub struct Param {
 // Statements
 #[derive(Debug, Clone)]
 pub enum Stmt {
-    Scope(Scope),
+    Block(Block),
     Decl(Decl),
     IfStmt(IfStmt),
     WhileLoop(WhileLoop),
@@ -44,11 +44,11 @@ pub enum Stmt {
 }
 
 #[derive(Debug, Clone)]
-pub struct Scope {
+pub struct Block {
     pub stmts: Vec<Node<Stmt>>,
 }
 
-impl Scope {
+impl Block {
     pub fn print(&self) {
         println!("{}", format!("{:#?}", self).replace("  ", " "));
     }
@@ -64,18 +64,18 @@ pub struct Decl {
 #[derive(Debug, Clone)]
 pub struct IfStmt {
     pub cond: Node<Expr>,
-    pub body: Node<Scope>,
+    pub body: Node<Block>,
 }
 
 #[derive(Debug, Clone)]
 pub struct WhileLoop {
     pub cond: Node<Expr>,
-    pub body: Node<Scope>,
+    pub body: Node<Block>,
 }
 
 #[derive(Debug, Clone)]
 pub struct DoWhileLoop {
-    pub body: Node<Scope>,
+    pub body: Node<Block>,
     pub cond: Node<Expr>,
 }
 
@@ -84,7 +84,7 @@ pub struct Func {
     pub name: Node<Ident>,
     pub args: Vec<Node<Param>>,
     pub ret: Option<Node<Ident>>,
-    pub body: Node<Scope>,
+    pub body: Node<Block>,
     // TODO: Add ID, like Expr::Ident
 }
 
