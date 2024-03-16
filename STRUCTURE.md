@@ -13,7 +13,7 @@
 | DoWhileLoop | Do, Scope, While, Expr(bool) | ✓ | ✓ |
 | Break | Break |
 | Break | Break, Label |
-| Continue | Continue | ✓ |
+| Continue | Continue | ✓ | ✓ |
 | Return | Return | ✓ |
 | Return | Return, Expr | ✓ |
 | Decl | Let, Ident, Assignment, Expr | ✓ | ✓ |
