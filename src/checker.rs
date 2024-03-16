@@ -40,6 +40,7 @@ impl Checker {
             Stmt::IfStmt(ref mut x) => self.check_if_stmt(x),
             Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
             Stmt::DoWhileLoop(ref mut x) => self.check_do_while_loop(x),
+            Stmt::Continue => (),
             _ => self.panic(
                 "Invalid statement".to_owned(),
                 node,

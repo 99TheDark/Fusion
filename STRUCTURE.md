@@ -10,10 +10,10 @@
 | List&lt;T&gt; | [T, Comma(skip last)] | ✓ |
 | IfStmt | If, Expr(bool), Scope | ✓ | ✓ |
 | WhileLoop | While, Expr(bool), Scope | ✓ | ✓ |
-| DoWhileLoop | Do, Scope, While, Expr(bool) | ✓ |
+| DoWhileLoop | Do, Scope, While, Expr(bool) | ✓ | ✓ |
 | Break | Break |
 | Break | Break, Label |
-| Continue | Continue |
+| Continue | Continue | ✓ |
 | Return | Return | ✓ |
 | Return | Return, Expr | ✓ |
 | Decl | Let, Ident, Assignment, Expr | ✓ | ✓ |

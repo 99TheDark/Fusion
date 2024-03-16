@@ -182,6 +182,7 @@ impl Parser {
             Type::If => self.parse_if_stmt(),
             Type::While => self.parse_while_loop(),
             Type::Do => self.parse_do_while_loop(),
+            Type::Continue => self.parse_continue(),
             Type::Return => self.parse_return(),
             Type::Function => self.parse_func(),
             _ => {
@@ -253,6 +254,13 @@ impl Parser {
         let cond = self.parse_expr();
 
         self.node(Stmt::DoWhileLoop(ast::DoWhileLoop { body, cond }), start)
+    }
+
+    fn parse_continue(&mut self) -> Node<Stmt> {
+        let start = self.cur_loc();
+        self.expect(Type::Continue);
+
+        self.node(Stmt::Continue, start)
     }
 
     fn parse_return(&mut self) -> Node<Stmt> {

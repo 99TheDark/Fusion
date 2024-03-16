@@ -4,4 +4,7 @@ if true | false ^& true {
     let z = 0
 }
 
-do { let x = 5 - true } while 3 * 7 ^ 2
+while true {
+    let x = 5
+    continue
+}

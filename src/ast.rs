@@ -39,6 +39,7 @@ pub enum Stmt {
     WhileLoop(WhileLoop),
     DoWhileLoop(DoWhileLoop),
     Func(Func),
+    Continue,
     Return(Return),
 }
 
