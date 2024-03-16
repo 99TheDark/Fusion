@@ -34,7 +34,7 @@ impl Checker {
     // Statements
     fn check_stmt(&mut self, node: &mut Node<Stmt>) {
         match &mut node.src {
-            Stmt::Block(ref mut x) => self.check_scope(x),
+            Stmt::Block(ref mut x) => self.check_block(x),
             Stmt::Decl(ref mut x) => self.check_decl(x),
             Stmt::IfStmt(ref mut x) => self.check_if_stmt(x),
             Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
@@ -48,7 +48,7 @@ impl Checker {
         }
     }
 
-    fn check_scope(&mut self, block: &mut ast::Block) {
+    fn check_block(&mut self, block: &mut ast::Block) {
         for stmt in &mut block.stmts {
             self.check_stmt(stmt);
         }
@@ -76,16 +76,16 @@ impl Checker {
 
     fn check_if_stmt(&mut self, if_stmt: &mut ast::IfStmt) {
         self.verify_cond(&mut if_stmt.cond);
-        self.check_scope(&mut if_stmt.body.src);
+        self.check_block(&mut if_stmt.body.src);
     }
 
     fn check_while_loop(&mut self, while_loop: &mut ast::WhileLoop) {
         self.verify_cond(&mut while_loop.cond);
-        self.check_scope(&mut while_loop.body.src);
+        self.check_block(&mut while_loop.body.src);
     }
 
     fn check_do_while_loop(&mut self, do_while_loop: &mut ast::DoWhileLoop) {
-        self.check_scope(&mut do_while_loop.body.src);
+        self.check_block(&mut do_while_loop.body.src);
         self.verify_cond(&mut do_while_loop.cond);
     }
 

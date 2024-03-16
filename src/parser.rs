@@ -113,7 +113,7 @@ impl Parser {
         body
     }
 
-    fn parse_scope(&mut self) -> Node<ast::Block> {
+    fn parse_block(&mut self) -> Node<ast::Block> {
         let start = self.cur_loc();
 
         self.expect(Type::LeftBrace);
@@ -189,7 +189,7 @@ impl Parser {
     fn parse_stmt(&mut self) -> Node<Stmt> {
         let tok = self.at();
         match tok.typ {
-            Type::LeftBrace => self.parse_scope_stmt(),
+            Type::LeftBrace => self.parse_block_stmt(),
             Type::Let => self.parse_decl(),
             Type::If => self.parse_if_stmt(),
             Type::While => self.parse_while_loop(),
@@ -206,8 +206,8 @@ impl Parser {
         // Also, maybe give warning for unneeded newlines after this is implemented
     }
 
-    fn parse_scope_stmt(&mut self) -> Node<Stmt> {
-        let block = self.parse_scope();
+    fn parse_block_stmt(&mut self) -> Node<Stmt> {
+        let block = self.parse_block();
         self.node(Stmt::Block(block.src), block.start)
     }
 
@@ -242,7 +242,7 @@ impl Parser {
 
         self.eat();
         let cond = self.parse_expr();
-        let body = self.parse_scope();
+        let body = self.parse_block();
 
         self.node(Stmt::IfStmt(ast::IfStmt { cond, body }), start)
     }
@@ -252,7 +252,7 @@ impl Parser {
 
         self.eat();
         let cond = self.parse_expr();
-        let body = self.parse_scope();
+        let body = self.parse_block();
 
         self.node(Stmt::WhileLoop(ast::WhileLoop { cond, body }), start)
     }
@@ -261,7 +261,7 @@ impl Parser {
         let start = self.cur_loc();
 
         self.eat();
-        let body = self.parse_scope();
+        let body = self.parse_block();
         self.expect(Type::While);
         let cond = self.parse_expr();
 
@@ -305,7 +305,7 @@ impl Parser {
             None
         };
 
-        let body = self.parse_scope();
+        let body = self.parse_block();
 
         self.node(
             Stmt::Func(ast::Func {
