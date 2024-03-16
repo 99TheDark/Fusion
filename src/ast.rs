@@ -2,7 +2,6 @@ use crate::location::Location;
 use crate::tokens::Type;
 use crate::types::DataType;
 
-// TODO: Implement for stmts and exprs
 #[derive(Debug, Clone)]
 pub struct Meta<T> {
     pub src: T,

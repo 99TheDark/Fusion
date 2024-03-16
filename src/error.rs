@@ -51,7 +51,22 @@ impl Error {
 
     pub fn panic(&self) {
         let Location { row, col, idx } = self.start;
-        let Location { idx: end_idx, .. } = self.end;
+        let Location {
+            row: end_row,
+            idx: ending,
+            ..
+        } = self.end;
+
+        let end_idx = if end_row == row {
+            ending
+        } else {
+            let mut sum = 0;
+            for row in &self.lines[0..=row as usize] {
+                // +1 for the new line
+                sum += row.len() as u32 + 1;
+            }
+            sum - 1
+        };
 
         let num_size = size(row + 1);
 

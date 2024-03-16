@@ -1,10 +1,12 @@
 use std::rc::Rc;
 
-use crate::ast::{self, Expr, Meta, Node, Stmt};
-use crate::error::{Error, ErrorCode};
-use crate::location::Location;
-use crate::program::Program;
-use crate::tokens::{Token, Type, KEYWORDS, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS};
+use crate::{
+    ast::{self, Expr, Meta, Node, Stmt},
+    error::{Error, ErrorCode},
+    location::Location,
+    program::Program,
+    tokens::{Token, Type, KEYWORDS, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS},
+};
 
 pub struct Parser {
     pub lines: Rc<Vec<String>>,
@@ -187,7 +189,8 @@ impl Parser {
                 panic!();
             }
         }
-        // TODO: Expect semicolon, newline or eof at the end of each statement
+        // TODO: Expect Semicolon, NewLine or EOF at the end of each statement
+        // Also, maybe give warning for unneeded newlines after this is implemented
     }
 
     fn parse_scope_stmt(&mut self) -> Node<Stmt> {

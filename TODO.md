@@ -1,6 +1,7 @@
 # TODO
-- Swap `Some(size)` + `None` with automatic type casting
+- Convert `Program` to a `Scope`
 - Add groups
+- Variable type checking
 - Identifier-starting statements, like assignments, function calls and type conversions
 - Split each file into multiple
     - AST into misc, statements & expressions

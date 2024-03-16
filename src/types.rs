@@ -68,11 +68,11 @@ impl IntegralSize {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Int {
-    pub size: Option<IntegralSize>,
+    pub size: IntegralSize,
 }
 
 impl Int {
-    pub fn new(size: Option<IntegralSize>) -> DataType {
+    pub fn new(size: IntegralSize) -> DataType {
         DataType::Int(Int { size })
     }
 
@@ -80,7 +80,7 @@ impl Int {
         if &src[0..3] == "int" {
             for size in IntegralSize::VALUES {
                 if (size as u32).to_string() == &src[3..] {
-                    return Some(Int { size: Some(size) });
+                    return Some(Int { size });
                 }
             }
         }
@@ -89,28 +89,21 @@ impl Int {
     }
 
     pub fn eq(&self, x: &Int) -> bool {
-        if self.size.is_none() || x.size.is_none() {
-            true
-        } else {
-            self.size == x.size
-        }
+        self.size == x.size
     }
 
     pub fn to_string(&self) -> String {
-        match self.size {
-            Some(size) => format!("int{}", size as u32),
-            None => "int".to_owned(),
-        }
+        format!("int{}", self.size as u32)
     }
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Uint {
-    pub size: Option<IntegralSize>,
+    pub size: IntegralSize,
 }
 
 impl Uint {
-    pub fn new(size: Option<IntegralSize>) -> DataType {
+    pub fn new(size: IntegralSize) -> DataType {
         DataType::Uint(Uint { size })
     }
 
@@ -118,7 +111,7 @@ impl Uint {
         if &src[0..3] == "int" {
             for size in IntegralSize::VALUES {
                 if (size as u32).to_string() == &src[3..] {
-                    return Some(Uint { size: Some(size) });
+                    return Some(Uint { size });
                 }
             }
         }
@@ -127,18 +120,11 @@ impl Uint {
     }
 
     pub fn eq(&self, x: &Uint) -> bool {
-        if self.size.is_none() || x.size.is_none() {
-            true
-        } else {
-            self.size == x.size
-        }
+        self.size == x.size
     }
 
     pub fn to_string(&self) -> String {
-        match self.size {
-            Some(size) => format!("uint{}", size as u32),
-            None => "uint".to_owned(),
-        }
+        format!("uint{}", self.size as u32)
     }
 }
 
@@ -161,11 +147,11 @@ impl FloatingSize {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Float {
-    pub size: Option<FloatingSize>,
+    pub size: FloatingSize,
 }
 
 impl Float {
-    pub fn new(size: Option<FloatingSize>) -> DataType {
+    pub fn new(size: FloatingSize) -> DataType {
         DataType::Float(Float { size })
     }
 
@@ -173,7 +159,7 @@ impl Float {
         if &src[0..5] == "float" {
             for size in FloatingSize::VALUES {
                 if (size as u32).to_string() == &src[5..] {
-                    return Some(Float { size: Some(size) });
+                    return Some(Float { size });
                 }
             }
         }
@@ -182,18 +168,11 @@ impl Float {
     }
 
     pub fn eq(&self, x: &Float) -> bool {
-        if self.size.is_none() || x.size.is_none() {
-            true
-        } else {
-            self.size == x.size
-        }
+        self.size == x.size
     }
 
     pub fn to_string(&self) -> String {
-        match self.size {
-            Some(size) => format!("float{}", size as u32),
-            None => "float".to_string(),
-        }
+        format!("float{}", self.size as u32)
     }
 }
 
@@ -220,11 +199,11 @@ impl Bool {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Array {
-    pub typ: Option<Box<DataType>>,
+    pub typ: Box<DataType>,
 }
 
 impl Array {
-    pub fn new(typ: Option<Box<DataType>>) -> DataType {
+    pub fn new(typ: Box<DataType>) -> DataType {
         DataType::Array(Array { typ })
     }
 
@@ -233,21 +212,15 @@ impl Array {
             println!("{}", &src[0..src.len() - 2]);
         }
 
-        None
+        // TODO: Implement
+        todo!()
     }
 
     pub fn eq(&self, x: &Array) -> bool {
-        if self.typ.is_none() || x.typ.is_none() {
-            true
-        } else {
-            self.typ.eq(&x.typ)
-        }
+        self.typ.eq(&x.typ)
     }
 
     pub fn to_string(&self) -> String {
-        match &self.typ {
-            Some(typ) => format!("{}[]", typ.to_string()),
-            None => "[]".to_owned(),
-        }
+        format!("{}[]", self.typ.to_string())
     }
 }

@@ -155,7 +155,7 @@ impl Type {
     }
 
     pub fn is_line_ending(self) -> bool {
-        self == Type::NewLine || self == Type::Semicolon
+        self == Type::NewLine || self == Type::Semicolon || self == Type::EOF
     }
 }
 

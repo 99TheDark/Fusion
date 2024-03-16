@@ -1,1 +1,5 @@
-let y: int32 = -32
+let x = 5
+
+if true | false & true {
+    let z = 0
+}

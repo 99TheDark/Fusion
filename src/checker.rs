@@ -4,10 +4,9 @@ use crate::{
     ast::{self, Expr, Meta, Node, Stmt},
     error::{Error, ErrorCode},
     program::Program,
-    types::{self, DataType},
+    types::{self, DataType, IntegralSize},
 };
 
-// TODO: Implement
 pub struct Checker {
     pub lines: Rc<Vec<String>>,
     pub prog: Program,
@@ -23,9 +22,10 @@ impl Checker {
     }
 
     // Statements
-    fn check_stmt(&mut self, node: &Node<Stmt>) {
-        match &node.src {
-            Stmt::Decl(x) => self.check_decl(&x),
+    fn check_stmt(&mut self, node: &mut Node<Stmt>) {
+        match &mut node.src {
+            Stmt::Scope(ref mut x) => self.check_scope(x),
+            Stmt::Decl(ref mut x) => self.check_decl(x),
             _ => self.panic(
                 "Invalid statement".to_owned(),
                 node,
@@ -34,9 +34,15 @@ impl Checker {
         }
     }
 
-    fn check_decl(&mut self, decl: &ast::Decl) {
-        let val = self.check_expr(&decl.val);
-        match &decl.annot {
+    fn check_scope(&mut self, scope: &mut ast::Scope) {
+        for stmt in &mut scope.stmts {
+            self.check_stmt(stmt);
+        }
+    }
+
+    fn check_decl(&mut self, decl: &mut ast::Decl) {
+        let val = self.check_expr(&mut decl.val);
+        match &mut decl.annot {
             Some(annot) => {
                 let (annot_typ, val_typ) = (annot.src.name.clone(), val.to_string());
                 if annot_typ != val_typ {
@@ -45,7 +51,7 @@ impl Checker {
                             "'{}' is defined to be type {}, but assigned {}",
                             decl.name.src.name, annot_typ, val_typ,
                         ),
-                        &decl.val,
+                        &mut decl.val,
                         ErrorCode::TypeMismatch,
                     )
                 }
@@ -55,9 +61,9 @@ impl Checker {
     }
 
     // Expressions
-    fn check_expr(&mut self, node: &Node<Expr>) -> DataType {
-        match &node.src {
-            Expr::NumLit(_) => types::Int::new(None), // Floats aren't real, they can't hurt you
+    fn check_expr(&mut self, node: &mut Node<Expr>) -> DataType {
+        let typ = match &mut node.src {
+            Expr::NumLit(_) => types::Int::new(IntegralSize::Int32), // Floats aren't real, they can't hurt you
             Expr::BoolLit(_) => types::Bool::new(),
             Expr::BinaryOp(binop) => self.check_binop(binop),
             Expr::UnaryOp(unop) => self.check_unop(unop),
@@ -69,12 +75,15 @@ impl Checker {
                 );
                 panic!()
             }
-        }
+        };
+
+        node.typ = Some(typ.clone());
+        typ
     }
 
-    fn check_binop(&mut self, binop: &ast::BinaryOp) -> DataType {
-        let left_typ = self.check_expr(&binop.lhs);
-        let right_typ = self.check_expr(&binop.rhs);
+    fn check_binop(&mut self, binop: &mut ast::BinaryOp) -> DataType {
+        let left_typ = self.check_expr(&mut binop.lhs);
+        let right_typ = self.check_expr(&mut binop.rhs);
 
         if !left_typ.eq(&right_typ) {
             self.panic(
@@ -84,7 +93,7 @@ impl Checker {
                     left_typ.to_string(),
                     right_typ.to_string(),
                 ),
-                &binop.op,
+                &mut binop.op,
                 ErrorCode::TypeMismatch,
             )
         }
@@ -92,14 +101,19 @@ impl Checker {
         left_typ // Since left_typ == right_typ
     }
 
-    fn check_unop(&mut self, unop: &ast::UnaryOp) -> DataType {
-        let typ = self.check_expr(&unop.val);
+    fn check_unop(&mut self, unop: &mut ast::UnaryOp) -> DataType {
+        let typ = self.check_expr(&mut unop.val);
         typ
     }
 
     pub fn check(&mut self) {
-        for stmt in &self.prog.stmts.clone() {
+        // Gotta figure out a better way of doing this
+        let mut prog = Program::new();
+        for stmt in &mut self.prog.stmts.clone().iter_mut() {
             self.check_stmt(stmt);
+            prog.stmts.push(stmt.clone());
         }
+
+        self.prog = prog;
     }
 }
