@@ -236,11 +236,11 @@ pub const ORDERED_BINARY_OPERATORS: &[&[Type]] = &[
         Type::NotEqual,
         Type::Equal,
     ],
-    &[Type::Modulo],
     &[Type::RightShift, Type::LeftShift, Type::ZeroFillRightShift],
-    &[Type::Exponentiation],
-    &[Type::Division, Type::Multiplication],
+    &[Type::Modulo],
     &[Type::Subtraction, Type::Addition],
+    &[Type::Division, Type::Multiplication],
+    &[Type::Exponentiation],
 ];
 
 pub const ORDERED_UNARY_OPERATORS: &[Type] = &[

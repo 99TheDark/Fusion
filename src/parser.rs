@@ -101,6 +101,14 @@ impl Parser {
         vals
     }
 
+    fn parse_group(&mut self) -> Node<Expr> {
+        self.eat();
+        let body = self.parse_expr();
+        self.expect(Type::RightParen);
+
+        body
+    }
+
     fn parse_scope(&mut self) -> Node<ast::Scope> {
         let start = self.cur_loc();
 
@@ -360,10 +368,21 @@ impl Parser {
     fn parse_primary(&mut self) -> Node<Expr> {
         let tok = self.at();
         let start = self.cur_loc();
-        let expr = match tok.typ {
-            Type::Identifier(_) => Expr::Ident(self.parse_raw_ident()),
-            Type::Number(_) => Expr::NumLit(self.parse_raw_num_lit()),
-            Type::Boolean(_) => Expr::BoolLit(self.parse_raw_bool_lit()),
+        match tok.typ {
+            // I find it really irritating you can't call a mut method who's parameter is a mut method
+            Type::Identifier(_) => {
+                let expr = Expr::Ident(self.parse_raw_ident());
+                self.node(expr, start)
+            }
+            Type::Number(_) => {
+                let expr = Expr::NumLit(self.parse_raw_num_lit());
+                self.node(expr, start)
+            }
+            Type::Boolean(_) => {
+                let expr = Expr::BoolLit(self.parse_raw_bool_lit());
+                self.node(expr, start)
+            }
+            Type::LeftParen => self.parse_group(),
             _ => {
                 self.panic(
                     format!("Invalid expression {}", tok.typ),
@@ -371,8 +390,7 @@ impl Parser {
                 );
                 panic!();
             }
-        };
-        self.node(expr, start)
+        }
     }
 
     fn parse_ident(&mut self) -> Node<ast::Ident> {

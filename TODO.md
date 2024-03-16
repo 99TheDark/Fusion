@@ -1,6 +1,5 @@
 # TODO
 - Convert `Program` to a `Scope`
-- Add groups
 - Variable type checking
 - Identifier-starting statements, like assignments, function calls and type conversions
 - Split each file into multiple

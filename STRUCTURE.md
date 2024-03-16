@@ -6,7 +6,7 @@
 | BinaryOp | Expr, Op, Expr | ✓ | ✓ |
 | UnaryOp | Op, Expr | ✓ | ✓ |
 | Scope | LeftBrace, Stmt[], RightBrace | ✓ | ✓ |
-| Group | LeftParen, Expr, RightParen |
+| Group | LeftParen, Expr, RightParen | ✓ | ✓ |
 | List&lt;T&gt; | [T, Comma(skip last)] | ✓ |
 | IfStmt | If, Expr(bool), Scope | ✓ | ✓ |
 | WhileLoop | While, Expr(bool), Scope | ✓ | ✓ |
