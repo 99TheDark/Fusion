@@ -39,6 +39,7 @@ impl Checker {
             Stmt::Decl(ref mut x) => self.check_decl(x),
             Stmt::IfStmt(ref mut x) => self.check_if_stmt(x),
             Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
+            Stmt::DoWhileLoop(ref mut x) => self.check_do_while_loop(x),
             _ => self.panic(
                 "Invalid statement".to_owned(),
                 node,
@@ -81,6 +82,11 @@ impl Checker {
     fn check_while_loop(&mut self, while_loop: &mut ast::WhileLoop) {
         self.verify_cond(&mut while_loop.cond);
         self.check_scope(&mut while_loop.body.src);
+    }
+
+    fn check_do_while_loop(&mut self, do_while_loop: &mut ast::DoWhileLoop) {
+        self.check_scope(&mut do_while_loop.body.src);
+        self.verify_cond(&mut do_while_loop.cond);
     }
 
     // Expressions
