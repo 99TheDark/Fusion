@@ -3,9 +3,11 @@
 - Identifier-starting statements, like assignments, function calls and type conversions
 - Custom number parser
 - Split each file into multiple
-    - AST into misc, statements & expressions
-    - Parser into basic, raw, other, statements, expressions
+    - AST into misc, meta, statements & expressions
+    - Parser into basic, raw, other, statements & expressions
+    - Checker into basic, statements & expressions
     - Tokens into token, types, and consts
+    - Scope into scope & variable
 - Modes
     - Comments
     - Strings

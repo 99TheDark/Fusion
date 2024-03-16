@@ -4,6 +4,7 @@ use crate::{
     ast::{self, Expr, Meta, Node, Stmt},
     error::{Error, ErrorCode},
     location::Location,
+    scope::Scope,
     tokens::{Token, Type, KEYWORDS, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS},
 };
 
@@ -11,16 +12,20 @@ pub struct Parser {
     pub lines: Rc<Vec<String>>,
     pub tokens: Vec<Token>,
     pub prog: ast::Block,
+    top: Rc<Option<Scope>>,
     idx: usize,
 }
 
 // Parsing
 impl Parser {
     pub fn new(lines: Rc<Vec<String>>, tokens: &Vec<Token>) -> Parser {
+        let prog_scope = Scope::new(Rc::new(None));
+
         Parser {
             lines,
             tokens: tokens.clone(),
             prog: ast::Block { stmts: Vec::new() },
+            top: Rc::new(Some(prog_scope)),
             idx: 0,
         }
     }

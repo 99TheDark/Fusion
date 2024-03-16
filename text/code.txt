@@ -1,1 +1,10 @@
-let x = (3 + 4 / (2 - 7 ^ 6)) * 5
+let x = 5
+
+if true | false ^& true {
+    let z = 0
+}
+
+while true {
+    let x = 5 * 4 - 3 ^ (7 + 2)
+    continue
+}
