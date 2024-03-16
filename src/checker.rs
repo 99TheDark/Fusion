@@ -21,12 +21,24 @@ impl Checker {
         Error::new(Rc::clone(&self.lines), message, node.start, node.end, id).panic();
     }
 
+    fn verify_cond(&mut self, cond: &mut Node<Expr>) {
+        let cond_typ = self.check_expr(cond);
+        if !cond_typ.eq(&types::Bool::new()) {
+            self.panic(
+                format!("Expected bool, but instead found {}", cond_typ.to_string()),
+                &cond,
+                ErrorCode::TypeMismatch,
+            )
+        }
+    }
+
     // Statements
     fn check_stmt(&mut self, node: &mut Node<Stmt>) {
         match &mut node.src {
             Stmt::Scope(ref mut x) => self.check_scope(x),
             Stmt::Decl(ref mut x) => self.check_decl(x),
             Stmt::IfStmt(ref mut x) => self.check_if_stmt(x),
+            Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
             _ => self.panic(
                 "Invalid statement".to_owned(),
                 node,
@@ -62,16 +74,13 @@ impl Checker {
     }
 
     fn check_if_stmt(&mut self, if_stmt: &mut ast::IfStmt) {
-        let cond_typ = self.check_expr(&mut if_stmt.cond);
-        if !cond_typ.eq(&types::Bool::new()) {
-            self.panic(
-                format!("Expected bool, but instead found {}", cond_typ.to_string()),
-                &if_stmt.cond,
-                ErrorCode::TypeMismatch,
-            )
-        }
-
+        self.verify_cond(&mut if_stmt.cond);
         self.check_scope(&mut if_stmt.body.src);
+    }
+
+    fn check_while_loop(&mut self, while_loop: &mut ast::WhileLoop) {
+        self.verify_cond(&mut while_loop.cond);
+        self.check_scope(&mut while_loop.body.src);
     }
 
     // Expressions

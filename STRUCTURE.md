@@ -1,23 +1,23 @@
 # Statement Structure
-| Kind | Components | Status |
-| - | - | :-: |
+| Kind | Components | Parsable | Checkable |
+| - | - | :-: | :-: |
 | Ident | Identifier | ✓ |
-| NumLit | Number | ✓ |
-| BinaryOp | Expr, Op, Expr | ✓ |
-| UnaryOp | Op, Expr | ✓ |
-| Scope | LeftBrace, Stmt[], RightBrace | ✓ |
+| NumLit | Number | ✓ | ✓ |
+| BinaryOp | Expr, Op, Expr | ✓ | ✓ |
+| UnaryOp | Op, Expr | ✓ | ✓ |
+| Scope | LeftBrace, Stmt[], RightBrace | ✓ | ✓ |
 | Group | LeftParen, Expr, RightParen |
 | List&lt;T&gt; | [T, Comma(skip last)] | ✓ |
-| IfStmt | If, Expr(bool), Scope | ✓ |
-| WhileLoop | While, Expr(bool), Scope | ✓ |
+| IfStmt | If, Expr(bool), Scope | ✓ | ✓ |
+| WhileLoop | While, Expr(bool), Scope | ✓ | ✓ |
 | DoWhileLoop | Do, Scope, While, Expr(bool) | ✓ |
 | Break | Break |
 | Break | Break, Label |
 | Continue | Continue |
 | Return | Return | ✓ |
 | Return | Return, Expr | ✓ |
-| Decl | Let, Ident, Assignment, Expr | ✓ |
-| Decl | Let, Ident, Colon, Ident, Assignment, Expr | ✓ |
+| Decl | Let, Ident, Assignment, Expr | ✓ | ✓ |
+| Decl | Let, Ident, Colon, Ident, Assignment, Expr | ✓ | ✓ |
 | Assign | Ident, Assignment, Expr |
 | OpAssign | Ident, Op, Assignment, Expr |
 | Param | Ident, Colon, Ident | ✓ |
