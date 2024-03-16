@@ -26,6 +26,7 @@ impl Checker {
         match &mut node.src {
             Stmt::Scope(ref mut x) => self.check_scope(x),
             Stmt::Decl(ref mut x) => self.check_decl(x),
+            Stmt::IfStmt(ref mut x) => self.check_if_stmt(x),
             _ => self.panic(
                 "Invalid statement".to_owned(),
                 node,
@@ -58,6 +59,19 @@ impl Checker {
             }
             None => (),
         };
+    }
+
+    fn check_if_stmt(&mut self, if_stmt: &mut ast::IfStmt) {
+        let cond_typ = self.check_expr(&mut if_stmt.cond);
+        if !cond_typ.eq(&types::Bool::new()) {
+            self.panic(
+                format!("Expected bool, but instead found {}", cond_typ.to_string()),
+                &if_stmt.cond,
+                ErrorCode::TypeMismatch,
+            )
+        }
+
+        self.check_scope(&mut if_stmt.body.src);
     }
 
     // Expressions
