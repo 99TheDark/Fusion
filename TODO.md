@@ -1,7 +1,7 @@
 # TODO
-- Convert `Program` to a `Scope`
 - Variable type checking
 - Identifier-starting statements, like assignments, function calls and type conversions
+- Custom number parser
 - Split each file into multiple
     - AST into misc, statements & expressions
     - Parser into basic, raw, other, statements, expressions

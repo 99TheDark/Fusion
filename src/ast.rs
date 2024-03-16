@@ -48,6 +48,12 @@ pub struct Scope {
     pub stmts: Vec<Node<Stmt>>,
 }
 
+impl Scope {
+    pub fn print(&self) {
+        println!("{}", format!("{:#?}", self).replace("  ", " "));
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Decl {
     pub name: Node<Ident>,

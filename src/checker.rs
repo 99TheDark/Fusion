@@ -3,17 +3,16 @@ use std::rc::Rc;
 use crate::{
     ast::{self, Expr, Meta, Node, Stmt},
     error::{Error, ErrorCode},
-    program::Program,
     types::{self, DataType, IntegralSize},
 };
 
 pub struct Checker {
     pub lines: Rc<Vec<String>>,
-    pub prog: Program,
+    pub prog: ast::Scope,
 }
 
 impl Checker {
-    pub fn new(lines: Rc<Vec<String>>, prog: Program) -> Checker {
+    pub fn new(lines: Rc<Vec<String>>, prog: ast::Scope) -> Checker {
         Checker { lines, prog }
     }
 
@@ -132,13 +131,12 @@ impl Checker {
     }
 
     fn check_unop(&mut self, unop: &mut ast::UnaryOp) -> DataType {
-        let typ = self.check_expr(&mut unop.val);
-        typ
+        self.check_expr(&mut unop.val)
     }
 
     pub fn check(&mut self) {
         // Gotta figure out a better way of doing this
-        let mut prog = Program::new();
+        let mut prog = ast::Scope { stmts: Vec::new() };
         for stmt in &mut self.prog.stmts.clone().iter_mut() {
             self.check_stmt(stmt);
             prog.stmts.push(stmt.clone());

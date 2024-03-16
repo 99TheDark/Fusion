@@ -4,14 +4,13 @@ use crate::{
     ast::{self, Expr, Meta, Node, Stmt},
     error::{Error, ErrorCode},
     location::Location,
-    program::Program,
     tokens::{Token, Type, KEYWORDS, ORDERED_BINARY_OPERATORS, ORDERED_UNARY_OPERATORS},
 };
 
 pub struct Parser {
     pub lines: Rc<Vec<String>>,
     pub tokens: Vec<Token>,
-    pub prog: Program,
+    pub prog: ast::Scope,
     idx: usize,
 }
 
@@ -21,7 +20,7 @@ impl Parser {
         Parser {
             lines,
             tokens: tokens.clone(),
-            prog: Program::new(),
+            prog: ast::Scope { stmts: Vec::new() },
             idx: 0,
         }
     }
@@ -403,16 +402,14 @@ impl Parser {
     pub fn parse(&mut self) {
         println!("{}.", ". ".to_owned().repeat(60));
 
-        let mut prog = Program::new();
         while self.tt() != Type::EOF {
             if self.tt().is_line_ending() {
                 self.eat();
                 continue;
             }
 
-            prog.stmts.push(self.parse_stmt());
+            let stmt = self.parse_stmt();
+            self.prog.stmts.push(stmt);
         }
-
-        self.prog = prog;
     }
 }
