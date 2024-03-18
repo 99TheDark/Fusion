@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::types::DataType;
+use crate::{error::ErrorCode, types::DataType};
 
 // Variable
 #[derive(Debug, Clone)]
@@ -15,7 +15,7 @@ pub static mut VARIABLE_ID: u32 = 0;
 #[derive(Debug, Clone)]
 pub struct Scope {
     pub parent: Option<Rc<RefCell<Scope>>>,
-    varis: HashMap<String, Variable>,
+    varis: HashMap<String, Rc<RefCell<Variable>>>,
 }
 
 impl Scope {
@@ -29,11 +29,34 @@ impl Scope {
     pub fn declare(&mut self, name: String) {
         self.varis.insert(
             name,
-            Variable {
+            Rc::new(RefCell::new(Variable {
                 id: unsafe { VARIABLE_ID.clone() },
                 typ: None,
-            },
+            })),
         );
         unsafe { VARIABLE_ID += 1 };
+    }
+
+    pub fn set(&self, name: &String, typ: DataType) -> Option<ErrorCode> {
+        match self.varis.get(name) {
+            Some(val) => {
+                val.borrow_mut().typ = Some(typ);
+                None
+            }
+            None => match self.parent {
+                Some(ref scope) => scope.as_ref().borrow().set(name, typ),
+                None => Some(ErrorCode::VariableNotFound),
+            },
+        }
+    }
+
+    pub fn get(&self, name: &String) -> Result<Rc<RefCell<Variable>>, ErrorCode> {
+        match self.varis.get(name) {
+            Some(val) if val.borrow().typ.is_some() => Ok(Rc::clone(val)),
+            _ => match self.parent {
+                Some(ref scope) => scope.as_ref().borrow().get(name),
+                None => Err(ErrorCode::VariableNotFound),
+            },
+        }
     }
 }

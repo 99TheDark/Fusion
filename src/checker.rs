@@ -31,7 +31,7 @@ impl Checker {
                 format!("Expected bool, but instead found {}", cond_typ.to_string()),
                 &cond,
                 ErrorCode::TypeMismatch,
-            )
+            );
         }
     }
 
@@ -53,9 +53,14 @@ impl Checker {
     }
 
     fn check_block(&mut self, block: &mut ast::Block) {
+        let top = Rc::clone(&self.top);
+        self.top = Rc::clone(&block.scope);
+
         for stmt in &mut block.stmts {
             self.check_stmt(stmt);
         }
+
+        self.top = top;
     }
 
     fn check_decl(&mut self, decl: &mut ast::Decl) {
@@ -71,11 +76,17 @@ impl Checker {
                         ),
                         &mut decl.val,
                         ErrorCode::TypeMismatch,
-                    )
+                    );
                 }
             }
             None => (),
         };
+
+        // Set type in scope
+        let name = &decl.name.src.name;
+        if let Some(err) = self.top.borrow().set(&name, val) {
+            self.panic(format!("Variable {} does not exist", name), &decl.name, err);
+        }
     }
 
     fn check_if_stmt(&mut self, if_stmt: &mut ast::IfStmt) {
@@ -95,11 +106,16 @@ impl Checker {
 
     // Expressions
     fn check_expr(&mut self, node: &mut Node<Expr>) -> DataType {
+        let copy = node.clone();
         let typ = match &mut node.src {
+            Expr::Ident(i) => self.check_ident(copy, i),
             Expr::NumLit(_) => types::Int::new(IntegralSize::Int32), // Floats aren't real, they can't hurt you
             Expr::BoolLit(_) => types::Bool::new(),
             Expr::BinaryOp(binop) => self.check_binop(binop),
             Expr::UnaryOp(unop) => self.check_unop(unop),
+
+            // In case any other expressions are added
+            #[allow(unreachable_patterns)]
             _ => {
                 self.panic(
                     "Invalid expression".to_owned(),
@@ -112,6 +128,25 @@ impl Checker {
 
         node.typ = Some(typ.clone());
         typ
+    }
+
+    fn check_ident(&mut self, node: Node<Expr>, ident: &mut ast::Ident) -> DataType {
+        match self.top.borrow().get(&ident.name) {
+            Ok(vari) => match vari.borrow().typ.as_ref() {
+                Some(val) => return val.clone(),
+                None => self.panic(
+                    format!("Variable {} does not exist", ident.name),
+                    &node,
+                    ErrorCode::VariableNotFound,
+                ),
+            },
+            Err(err) => self.panic(
+                format!("Variable {} does not exist", ident.name),
+                &node,
+                err,
+            ),
+        };
+        DataType::Bool(types::Bool {})
     }
 
     fn check_binop(&mut self, binop: &mut ast::BinaryOp) -> DataType {
@@ -128,7 +163,7 @@ impl Checker {
                 ),
                 &mut binop.op,
                 ErrorCode::TypeMismatch,
-            )
+            );
         }
 
         left_typ // Since left_typ == right_typ

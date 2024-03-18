@@ -1,8 +1,9 @@
 let x = 5
 let y = true
 if true {
-    let a = 4
-    if false {
+    let a = 4 + x
+    let x = true
+    if x | false {
         let b = 3
     }
     let z = -2

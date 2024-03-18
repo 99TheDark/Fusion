@@ -24,6 +24,7 @@ pub enum ErrorCode {
     InvalidExpression,
     ReservedNameUsed,
     TypeMismatch,
+    VariableNotFound,
 }
 
 impl fmt::Display for ErrorCode {
