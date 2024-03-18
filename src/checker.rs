@@ -1,19 +1,23 @@
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     ast::{self, Expr, Meta, Node, Stmt},
     error::{Error, ErrorCode},
+    scope::Scope,
     types::{self, DataType, IntegralSize},
 };
 
+#[allow(dead_code)] // Temporary
 pub struct Checker {
     pub lines: Rc<Vec<String>>,
     pub prog: ast::Block,
+    top: Rc<RefCell<Scope>>,
 }
 
 impl Checker {
     pub fn new(lines: Rc<Vec<String>>, prog: ast::Block) -> Checker {
-        Checker { lines, prog }
+        let top = Rc::clone(&prog.scope);
+        Checker { lines, prog, top }
     }
 
     fn panic<T>(&self, message: String, node: &Meta<T>, id: ErrorCode) {
@@ -136,7 +140,10 @@ impl Checker {
 
     pub fn check(&mut self) {
         // Gotta figure out a better way of doing this
-        let mut prog = ast::Block { stmts: Vec::new() };
+        let mut prog = ast::Block {
+            stmts: Vec::new(),
+            scope: Scope::new(None),
+        };
         for stmt in &mut self.prog.stmts.clone().iter_mut() {
             self.check_stmt(stmt);
             prog.stmts.push(stmt.clone());

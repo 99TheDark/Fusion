@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     ast::{self, Expr, Meta, Node, Stmt},
@@ -12,20 +12,24 @@ pub struct Parser {
     pub lines: Rc<Vec<String>>,
     pub tokens: Vec<Token>,
     pub prog: ast::Block,
-    top: Rc<Option<Scope>>,
+    top: Rc<RefCell<Scope>>,
     idx: usize,
 }
 
 // Parsing
 impl Parser {
     pub fn new(lines: Rc<Vec<String>>, tokens: &Vec<Token>) -> Parser {
-        let prog_scope = Scope::new(Rc::new(None));
+        let prog = ast::Block {
+            stmts: Vec::new(),
+            scope: Scope::new(None),
+        };
+        let top = Rc::clone(&prog.scope);
 
         Parser {
             lines,
             tokens: tokens.clone(),
-            prog: ast::Block { stmts: Vec::new() },
-            top: Rc::new(Some(prog_scope)),
+            prog,
+            top,
             idx: 0,
         }
     }
@@ -116,6 +120,11 @@ impl Parser {
     fn parse_block(&mut self) -> Node<ast::Block> {
         let start = self.cur_loc();
 
+        let top = Rc::clone(&self.top);
+
+        let scope = Scope::new(Some(Rc::clone(&top)));
+        self.top = Rc::clone(&scope);
+
         self.expect(Type::LeftBrace);
         let mut stmts: Vec<Node<Stmt>> = Vec::new();
         while self.tt() != Type::RightBrace {
@@ -128,7 +137,9 @@ impl Parser {
         }
         self.expect(Type::RightBrace);
 
-        self.node(ast::Block { stmts }, start)
+        self.top = Rc::clone(&top);
+
+        self.node(ast::Block { stmts, scope }, start)
     }
 
     // Raw parses
@@ -226,6 +237,8 @@ impl Parser {
 
         self.expect(Type::Assignment);
         let value = self.parse_expr();
+
+        self.top.borrow_mut().declare(ident.src.name.clone());
 
         self.node(
             Stmt::Decl(ast::Decl {

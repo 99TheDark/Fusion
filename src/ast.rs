@@ -1,4 +1,8 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::location::Location;
+use crate::scope::Scope;
 use crate::tokens::Type;
 use crate::types::DataType;
 
@@ -46,6 +50,7 @@ pub enum Stmt {
 #[derive(Debug, Clone)]
 pub struct Block {
     pub stmts: Vec<Node<Stmt>>,
+    pub scope: Rc<RefCell<Scope>>,
 }
 
 impl Block {
