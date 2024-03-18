@@ -142,7 +142,7 @@ impl Checker {
         // Gotta figure out a better way of doing this
         let mut prog = ast::Block {
             stmts: Vec::new(),
-            scope: Scope::new(None),
+            scope: Rc::clone(&self.prog.scope),
         };
         for stmt in &mut self.prog.stmts.clone().iter_mut() {
             self.check_stmt(stmt);
