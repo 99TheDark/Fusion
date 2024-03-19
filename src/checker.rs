@@ -74,7 +74,7 @@ impl Checker {
                             "'{}' is defined to be type {}, but assigned {}",
                             decl.name.src.name, annot_typ, val_typ,
                         ),
-                        &mut decl.val,
+                        &decl.val,
                         ErrorCode::TypeMismatch,
                     );
                 }
@@ -161,7 +161,7 @@ impl Checker {
                     left_typ.to_string(),
                     right_typ.to_string(),
                 ),
-                &mut binop.op,
+                &binop.op,
                 ErrorCode::TypeMismatch,
             );
         }

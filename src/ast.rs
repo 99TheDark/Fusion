@@ -26,6 +26,8 @@ impl<T> Meta<T> {
 }
 
 pub type Node<T> = Box<Meta<T>>;
+/*#[derive(Debug, Clone)]
+pub struct Node<T>(Box<Meta<T>>);*/
 
 // Partial
 #[derive(Debug, Clone)]
