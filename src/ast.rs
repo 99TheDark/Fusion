@@ -1,83 +1,17 @@
-use std::cell::RefCell;
-use std::rc::Rc;
+pub(crate) mod expression;
+pub(crate) mod meta;
+pub(crate) mod misc;
+pub(crate) mod node;
+pub(crate) mod statement;
 
-use crate::location::Location;
-use crate::scope::Scope;
-use crate::tokens::Type;
-use crate::types::DataType;
+pub use self::{
+    expression::{BinaryOp, BoolLit, Ident, NumLit, UnaryOp},
+    meta::Meta,
+    misc::Param,
+    node::Node,
+    statement::{Assign, Block, Decl, DoWhileLoop, Func, IfStmt, Return, WhileLoop},
+};
 
-#[derive(Clone)]
-pub struct Meta<T> {
-    pub src: T,
-    pub start: Location,
-    pub end: Location,
-    pub typ: Option<DataType>,
-}
-
-impl<T> Meta<T> {
-    pub fn new(src: T, start: Location, end: Location) -> Meta<T> {
-        Meta {
-            src,
-            start,
-            end,
-            typ: None,
-        }
-    }
-}
-
-impl<T> std::fmt::Debug for Meta<T>
-where
-    T: std::fmt::Debug,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{:#?}, {{ start: {}, end: {} }}",
-            self.src, self.start, self.end
-        )
-    }
-}
-
-#[derive(Clone)]
-pub struct Node<T>(pub Box<Meta<T>>);
-
-impl<T> Node<T> {
-    pub fn new(src: T, start: Location, end: Location) -> Node<T> {
-        Node(Box::new(Meta::new(src, start, end)))
-    }
-}
-
-impl<T> std::ops::Deref for Node<T> {
-    type Target = Box<Meta<T>>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<T> std::ops::DerefMut for Node<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-impl<T> std::fmt::Debug for Node<T>
-where
-    T: std::fmt::Debug,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:#?}", self.0)
-    }
-}
-
-// Partial
-#[derive(Debug, Clone)]
-pub struct Param {
-    pub name: Node<Ident>,
-    pub annot: Node<Ident>,
-}
-
-// Statements
 #[derive(Clone)]
 pub enum Stmt {
     Block(Block),
@@ -89,103 +23,6 @@ pub enum Stmt {
     Func(Func),
     Continue,
     Return(Return),
-}
-
-#[derive(Debug, Clone)]
-pub struct Block {
-    pub stmts: Vec<Node<Stmt>>,
-    pub scope: Rc<RefCell<Scope>>,
-}
-
-impl Block {
-    pub fn print(&self) {
-        println!("{}", format!("{:#?}", self).replace("  ", " "));
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Decl {
-    pub name: Node<Ident>,
-    pub annot: Option<Node<Ident>>,
-    pub val: Node<Expr>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Assign {
-    pub name: Node<Ident>,
-    pub op: Option<Meta<Type>>, // TODO: replace Meta<Type> (here and at binop + unop) with Token
-    pub val: Node<Expr>,
-}
-
-#[derive(Debug, Clone)]
-pub struct IfStmt {
-    pub cond: Node<Expr>,
-    pub body: Node<Block>,
-}
-
-#[derive(Debug, Clone)]
-pub struct WhileLoop {
-    pub cond: Node<Expr>,
-    pub body: Node<Block>,
-}
-
-#[derive(Debug, Clone)]
-pub struct DoWhileLoop {
-    pub body: Node<Block>,
-    pub cond: Node<Expr>,
-}
-
-#[derive(Debug, Clone)]
-pub struct Func {
-    pub name: Node<Ident>,
-    pub args: Vec<Node<Param>>,
-    pub ret: Option<Node<Ident>>,
-    pub body: Node<Block>,
-    // TODO: Add ID, like Expr::Ident
-}
-
-#[derive(Debug, Clone)]
-pub struct Return {
-    pub val: Option<Node<Expr>>,
-}
-
-// Expressions
-#[derive(Debug, Clone)]
-pub enum Expr {
-    Ident(Ident),
-    NumLit(NumLit),
-    BoolLit(BoolLit),
-    BinaryOp(BinaryOp),
-    UnaryOp(UnaryOp),
-}
-
-#[derive(Debug, Clone)]
-pub struct Ident {
-    pub name: String,
-    // TODO: Add ID
-}
-
-#[derive(Debug, Clone)]
-pub struct NumLit {
-    pub val: f32,
-}
-
-#[derive(Debug, Clone)]
-pub struct BoolLit {
-    pub val: bool,
-}
-
-#[derive(Debug, Clone)]
-pub struct BinaryOp {
-    pub op: Meta<Type>,
-    pub lhs: Node<Expr>,
-    pub rhs: Node<Expr>,
-}
-
-#[derive(Debug, Clone)]
-pub struct UnaryOp {
-    pub op: Meta<Type>,
-    pub val: Node<Expr>,
 }
 
 impl std::fmt::Debug for Stmt {
@@ -203,4 +40,13 @@ impl std::fmt::Debug for Stmt {
             Stmt::Return(x) => write!(f, "{:#?}", x),
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum Expr {
+    Ident(Ident),
+    NumLit(NumLit),
+    BoolLit(BoolLit),
+    BinaryOp(BinaryOp),
+    UnaryOp(UnaryOp),
 }

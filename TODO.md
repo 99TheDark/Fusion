@@ -1,12 +1,6 @@
 # TODO
-- Custom number parser
-- Split each file into multiple
-    - AST into misc, meta, node, statements & expressions
-    - Parser into basic, raw, other, statements & expressions
-    - Checker into basic, statements & expressions
-    - Tokens into token, types, and consts
-    - Scope into scope & variable
 - Add table of functions (and eventually class + structs) in a `Program` struct
+- Custom number parser
 - Parse function calls
 - Check function calls
 - Modes
@@ -16,6 +10,7 @@
 - Struct parsing
 - Pretty print AST
 - Class parsing
+- Add operators to table
 - Auto calculation
     - Combine negative sign and number to make a negative number
     - Some expression like `(5 * 4.2 / 3 - 17 + 2 ^ 4) ^ 0.4` automatically becomes just `2.047673`...

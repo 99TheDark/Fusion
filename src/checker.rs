@@ -1,13 +1,15 @@
 use std::{cell::RefCell, rc::Rc};
 
+pub(crate) mod expressions;
+pub(crate) mod statements;
+
 use crate::{
-    ast::{self, Expr, Meta, Node, Stmt},
+    ast::{self, Expr, Meta, Node},
     error::{Error, ErrorCode},
     scope::Scope,
-    types::{self, DataType, IntegralSize},
+    types::{self},
 };
 
-#[allow(dead_code)] // Temporary
 pub struct Checker {
     pub lines: Rc<Vec<String>>,
     pub prog: ast::Block,
@@ -33,174 +35,6 @@ impl Checker {
                 ErrorCode::TypeMismatch,
             );
         }
-    }
-
-    // Statements
-    fn check_stmt(&mut self, node: &mut Node<Stmt>) {
-        match &mut node.src {
-            Stmt::Block(ref mut x) => self.check_block(x),
-            Stmt::Decl(ref mut x) => self.check_decl(x),
-            Stmt::Assign(ref mut x) => self.check_assign(x),
-            Stmt::IfStmt(ref mut x) => self.check_if_stmt(x),
-            Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
-            Stmt::DoWhileLoop(ref mut x) => self.check_do_while_loop(x),
-            Stmt::Continue => (),
-            _ => self.panic(
-                "Invalid statement".to_owned(),
-                node,
-                ErrorCode::InvalidStatement,
-            ),
-        }
-    }
-
-    fn check_block(&mut self, block: &mut ast::Block) {
-        let top = Rc::clone(&self.top);
-        self.top = Rc::clone(&block.scope);
-
-        for stmt in &mut block.stmts {
-            self.check_stmt(stmt);
-        }
-
-        self.top = top;
-    }
-
-    fn check_decl(&mut self, decl: &mut ast::Decl) {
-        let val = self.check_expr(&mut decl.val);
-        match &mut decl.annot {
-            Some(annot) => {
-                let (annot_typ, val_typ) = (annot.src.name.clone(), val.to_string());
-                if annot_typ != val_typ {
-                    self.panic(
-                        format!(
-                            "'{}' is defined to be type {}, but assigned {}",
-                            decl.name.src.name, annot_typ, val_typ,
-                        ),
-                        &decl.val,
-                        ErrorCode::TypeMismatch,
-                    );
-                }
-            }
-            None => (),
-        };
-
-        // Set type in scope
-        let name = &decl.name.src.name;
-        if let Some(err) = self.top.borrow_mut().set(&name, val) {
-            self.panic(format!("Variable {} does not exist", name), &decl.name, err);
-        }
-    }
-
-    fn check_assign(&mut self, assign: &mut ast::Assign) {
-        let val = self.check_expr(&mut assign.val);
-        // TODO: Check if operator is legal for the type
-
-        let name = &assign.name.src.name;
-
-        match self.top.borrow().get(&name) {
-            Ok(vari) => {
-                let typ = vari.borrow().typ.as_ref().unwrap().clone();
-                if typ != val {
-                    self.panic(
-                        format!(
-                            "Tried to assign type {}, expected type {}",
-                            val.to_string(),
-                            typ.to_string()
-                        ),
-                        &assign.name,
-                        ErrorCode::TypeMismatch,
-                    );
-                }
-            }
-            Err(err) => self.panic(
-                format!("Variable {} does not exist", name),
-                &assign.name,
-                err,
-            ),
-        }
-    }
-
-    fn check_if_stmt(&mut self, if_stmt: &mut ast::IfStmt) {
-        self.verify_cond(&mut if_stmt.cond);
-        self.check_block(&mut if_stmt.body.src);
-    }
-
-    fn check_while_loop(&mut self, while_loop: &mut ast::WhileLoop) {
-        self.verify_cond(&mut while_loop.cond);
-        self.check_block(&mut while_loop.body.src);
-    }
-
-    fn check_do_while_loop(&mut self, do_while_loop: &mut ast::DoWhileLoop) {
-        self.check_block(&mut do_while_loop.body.src);
-        self.verify_cond(&mut do_while_loop.cond);
-    }
-
-    // Expressions
-    fn check_expr(&mut self, node: &mut Node<Expr>) -> DataType {
-        let copy = node.clone();
-        let typ = match &mut node.src {
-            Expr::Ident(i) => self.check_ident(copy, i),
-            Expr::NumLit(_) => types::Int::new(IntegralSize::Int32), // Floats aren't real, they can't hurt you
-            Expr::BoolLit(_) => types::Bool::new(),
-            Expr::BinaryOp(binop) => self.check_binop(binop),
-            Expr::UnaryOp(unop) => self.check_unop(unop),
-
-            // In case any other expressions are added
-            #[allow(unreachable_patterns)]
-            _ => {
-                self.panic(
-                    "Invalid expression".to_owned(),
-                    node,
-                    ErrorCode::InvalidExpression,
-                );
-                panic!()
-            }
-        };
-
-        node.typ = Some(typ.clone());
-        typ
-    }
-
-    fn check_ident(&mut self, node: Node<Expr>, ident: &mut ast::Ident) -> DataType {
-        match self.top.borrow().get(&ident.name) {
-            Ok(vari) => match vari.borrow().typ.as_ref() {
-                Some(val) => return val.clone(),
-                None => self.panic(
-                    format!("Variable {} does not exist", ident.name),
-                    &node,
-                    ErrorCode::VariableNotFound,
-                ),
-            },
-            Err(err) => self.panic(
-                format!("Variable {} does not exist", ident.name),
-                &node,
-                err,
-            ),
-        };
-        DataType::Bool(types::Bool {})
-    }
-
-    fn check_binop(&mut self, binop: &mut ast::BinaryOp) -> DataType {
-        let left_typ = self.check_expr(&mut binop.lhs);
-        let right_typ = self.check_expr(&mut binop.rhs);
-
-        if !left_typ.eq(&right_typ) {
-            self.panic(
-                format!(
-                    "Cannot use the {} operator on {} and {}",
-                    binop.op.src.src_strings().get(0).unwrap(),
-                    left_typ.to_string(),
-                    right_typ.to_string(),
-                ),
-                &binop.op,
-                ErrorCode::TypeMismatch,
-            );
-        }
-
-        left_typ // Since left_typ == right_typ
-    }
-
-    fn check_unop(&mut self, unop: &mut ast::UnaryOp) -> DataType {
-        self.check_expr(&mut unop.val)
     }
 
     pub fn check(&mut self) {
