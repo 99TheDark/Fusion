@@ -8,3 +8,8 @@ if true {
     }
     let z = -2
 }
+
+x += 4
+x = 7
+
+x *= true | false

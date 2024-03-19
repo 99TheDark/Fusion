@@ -200,6 +200,7 @@ impl Parser {
     fn parse_stmt(&mut self) -> Node<Stmt> {
         let tok = self.at();
         match tok.typ {
+            Type::Identifier(_) => self.parse_assign(),
             Type::LeftBrace => self.parse_block_stmt(),
             Type::Let => self.parse_decl(),
             Type::If => self.parse_if_stmt(),
@@ -248,6 +249,32 @@ impl Parser {
             }),
             start,
         )
+    }
+
+    fn parse_assign(&mut self) -> Node<Stmt> {
+        let start = self.cur_loc();
+
+        let name = self.parse_ident();
+
+        let mut has_op = false;
+        for ops in ORDERED_BINARY_OPERATORS {
+            if self.tt().is(ops) {
+                has_op = true;
+                break;
+            }
+        }
+
+        let op = if has_op {
+            let tok = self.eat();
+            Some(Meta::new(tok.typ, tok.start, tok.end))
+        } else {
+            None
+        };
+
+        self.expect(Type::Assignment);
+        let val = self.parse_expr();
+
+        self.node(Stmt::Assign(ast::Assign { name, op, val }), start)
     }
 
     fn parse_if_stmt(&mut self) -> Node<Stmt> {

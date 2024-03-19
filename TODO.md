@@ -1,5 +1,4 @@
 # TODO
-- Identifier-starting statements, like assignments, function calls and type conversions
 - Custom number parser
 - Split each file into multiple
     - AST into misc, meta, node, statements & expressions
@@ -7,6 +6,9 @@
     - Checker into basic, statements & expressions
     - Tokens into token, types, and consts
     - Scope into scope & variable
+- Add table of functions (and eventually class + structs) in a `Program` struct
+- Parse function calls
+- Check function calls
 - Modes
     - Comments
     - Strings

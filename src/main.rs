@@ -27,10 +27,8 @@ fn main() {
     let mut parser = Parser::new(Rc::clone(&lines), &tokens);
     parser.parse();
 
-    parser.prog.print();
-
     let mut checker = Checker::new(Rc::clone(&lines), parser.prog);
     checker.check();
 
-    // checker.prog.print()
+    checker.prog.print()
 }

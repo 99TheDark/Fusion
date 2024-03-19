@@ -21,8 +21,8 @@
 | Return | Return, Expr | ✓ |
 | Decl | Let, Ident, Assignment, Expr | ✓ | ✓ |
 | Decl | Let, Ident, Colon, Ident, Assignment, Expr | ✓ | ✓ |
-| Assign | Ident, Assignment, Expr |
-| OpAssign | Ident, Op, Assignment, Expr |
+| Assign | Ident, Assignment, Expr | ✓ | ✓ |
+| OpAssign | Ident, Op, Assignment, Expr | ✓ | ✓ |
 | Param | Ident, Colon, Ident | ✓ |
 | Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Block | ✓ |
 | Function | Func, LeftParen, List&lt;Param&gt;, RightParen, Colon, List&lt;Ident&gt;, Block | ✓ |

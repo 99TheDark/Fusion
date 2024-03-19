@@ -82,6 +82,7 @@ pub struct Param {
 pub enum Stmt {
     Block(Block),
     Decl(Decl),
+    Assign(Assign),
     IfStmt(IfStmt),
     WhileLoop(WhileLoop),
     DoWhileLoop(DoWhileLoop),
@@ -106,6 +107,13 @@ impl Block {
 pub struct Decl {
     pub name: Node<Ident>,
     pub annot: Option<Node<Ident>>,
+    pub val: Node<Expr>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Assign {
+    pub name: Node<Ident>,
+    pub op: Option<Meta<Type>>, // TODO: replace Meta<Type> (here and at binop + unop) with Token
     pub val: Node<Expr>,
 }
 
@@ -186,6 +194,7 @@ impl std::fmt::Debug for Stmt {
         match self {
             Stmt::Block(x) => write!(f, "{:#?}", x),
             Stmt::Decl(x) => write!(f, "{:#?}", x),
+            Stmt::Assign(x) => write!(f, "{:#?}", x),
             Stmt::IfStmt(x) => write!(f, "{:#?}", x),
             Stmt::WhileLoop(x) => write!(f, "{:#?}", x),
             Stmt::DoWhileLoop(x) => write!(f, "{:#?}", x),

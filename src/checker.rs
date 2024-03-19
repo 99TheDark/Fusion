@@ -40,6 +40,7 @@ impl Checker {
         match &mut node.src {
             Stmt::Block(ref mut x) => self.check_block(x),
             Stmt::Decl(ref mut x) => self.check_decl(x),
+            Stmt::Assign(ref mut x) => self.check_assign(x),
             Stmt::IfStmt(ref mut x) => self.check_if_stmt(x),
             Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
             Stmt::DoWhileLoop(ref mut x) => self.check_do_while_loop(x),
@@ -84,8 +85,37 @@ impl Checker {
 
         // Set type in scope
         let name = &decl.name.src.name;
-        if let Some(err) = self.top.borrow().set(&name, val) {
+        if let Some(err) = self.top.borrow_mut().set(&name, val) {
             self.panic(format!("Variable {} does not exist", name), &decl.name, err);
+        }
+    }
+
+    fn check_assign(&mut self, assign: &mut ast::Assign) {
+        let val = self.check_expr(&mut assign.val);
+        // TODO: Check if operator is legal for the type
+
+        let name = &assign.name.src.name;
+
+        match self.top.borrow().get(&name) {
+            Ok(vari) => {
+                let typ = vari.borrow().typ.as_ref().unwrap().clone();
+                if typ != val {
+                    self.panic(
+                        format!(
+                            "Tried to assign type {}, expected type {}",
+                            val.to_string(),
+                            typ.to_string()
+                        ),
+                        &assign.name,
+                        ErrorCode::TypeMismatch,
+                    );
+                }
+            }
+            Err(err) => self.panic(
+                format!("Variable {} does not exist", name),
+                &assign.name,
+                err,
+            ),
         }
     }
 
