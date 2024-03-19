@@ -6,7 +6,7 @@ use crate::scope::Scope;
 use crate::tokens::Type;
 use crate::types::DataType;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Meta<T> {
     pub src: T,
     pub start: Location,
@@ -22,6 +22,19 @@ impl<T> Meta<T> {
             end,
             typ: None,
         }
+    }
+}
+
+impl<T> std::fmt::Debug for Meta<T>
+where
+    T: std::fmt::Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{:#?}, {{ start: {}, end: {} }}",
+            self.src, self.start, self.end
+        )
     }
 }
 
@@ -53,11 +66,7 @@ where
     T: std::fmt::Debug,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{:#?}, {{ start: {}, end: {} }}",
-            self.src, self.start, self.end
-        )
+        write!(f, "{:#?}", self.0)
     }
 }
 

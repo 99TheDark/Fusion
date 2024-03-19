@@ -12,6 +12,7 @@
     - Strings
 - Reverse operator precedence
 - Struct parsing
+- Pretty print AST
 - Class parsing
 - Auto calculation
     - Combine negative sign and number to make a negative number
