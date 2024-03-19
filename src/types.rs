@@ -49,6 +49,7 @@ impl DataType {
 
 impl std::fmt::Debug for DataType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // I hate this implementation...
         match self {
             DataType::Int(x) => write!(f, "{:#?}", x),
             DataType::Uint(x) => write!(f, "{:#?}", x),

@@ -1,5 +1,4 @@
 # TODO
-- Pretty print AST
 - Identifier-starting statements, like assignments, function calls and type conversions
 - Custom number parser
 - Split each file into multiple

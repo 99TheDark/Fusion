@@ -55,7 +55,7 @@ where
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{:#?}, (start at {}, end at {})",
+            "{:#?}, {{ start: {}, end: {} }}",
             self.src, self.start, self.end
         )
     }
@@ -69,7 +69,7 @@ pub struct Param {
 }
 
 // Statements
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Stmt {
     Block(Block),
     Decl(Decl),
@@ -169,4 +169,20 @@ pub struct BinaryOp {
 pub struct UnaryOp {
     pub op: Meta<Type>,
     pub val: Node<Expr>,
+}
+
+impl std::fmt::Debug for Stmt {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // I also hate this implementation...
+        match self {
+            Stmt::Block(x) => write!(f, "{:#?}", x),
+            Stmt::Decl(x) => write!(f, "{:#?}", x),
+            Stmt::IfStmt(x) => write!(f, "{:#?}", x),
+            Stmt::WhileLoop(x) => write!(f, "{:#?}", x),
+            Stmt::DoWhileLoop(x) => write!(f, "{:#?}", x),
+            Stmt::Func(x) => write!(f, "{:#?}", x),
+            Stmt::Continue => write!(f, "Continue"),
+            Stmt::Return(x) => write!(f, "{:#?}", x),
+        }
+    }
 }

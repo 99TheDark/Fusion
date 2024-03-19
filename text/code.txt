@@ -8,3 +8,4 @@ if true {
     }
     let z = -2
 }
+continue
