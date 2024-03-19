@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 pub enum DataType {
     Int(Int),
     Uint(Uint),
@@ -43,6 +43,18 @@ impl DataType {
             DataType::Float(x) => x.to_string(),
             DataType::Bool(x) => x.to_string(),
             DataType::Array(x) => x.to_string(),
+        }
+    }
+}
+
+impl std::fmt::Debug for DataType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DataType::Int(x) => write!(f, "{:#?}", x),
+            DataType::Uint(x) => write!(f, "{:#?}", x),
+            DataType::Float(x) => write!(f, "{:#?}", x),
+            DataType::Bool(x) => write!(f, "{:#?}", x),
+            DataType::Array(x) => write!(f, "{:#?}", x),
         }
     }
 }

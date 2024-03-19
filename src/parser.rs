@@ -85,7 +85,7 @@ impl Parser {
     }
 
     fn node<T>(&self, node: T, start: Location) -> Node<T> {
-        Box::new(Meta::new(node, start, self.prev_stop()))
+        Node::new(node, start, self.prev_stop())
     }
 
     // Misc
@@ -219,7 +219,7 @@ impl Parser {
 
     fn parse_block_stmt(&mut self) -> Node<Stmt> {
         let block = self.parse_block();
-        self.node(Stmt::Block(block.src), block.start)
+        self.node(Stmt::Block(block.src.clone()), block.start)
     }
 
     fn parse_decl(&mut self) -> Node<Stmt> {
