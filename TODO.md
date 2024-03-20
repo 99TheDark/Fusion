@@ -1,12 +1,16 @@
 # TODO
+- Function type checking
+- Add function signatures to program
 - Custom number parser
 - Parse function calls
 - Check function calls
 - Modes
     - Comments
     - Strings
-- Reverse operator precedence
+- Fix operator precedence
 - Struct parsing
+- Legal operation list
+    - Check legal operations on binary operators & operator assignments
 - Pretty print AST
 - Class parsing
 - Add operators to table
@@ -14,3 +18,4 @@
     - Combine negative sign and number to make a negative number
     - Some expression like `(5 * 4.2 / 3 - 17 + 2 ^ 4) ^ 0.4` automatically becomes just `2.047673`...
 - String interpolation
+- Control flow analysis (generate CFG)
