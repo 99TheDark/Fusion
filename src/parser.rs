@@ -5,6 +5,7 @@ pub(crate) mod misc;
 pub(crate) mod raw;
 pub(crate) mod statements;
 
+use crate::program::Program;
 pub use crate::{
     ast::{self, Node},
     error::{Error, ErrorCode},
@@ -16,7 +17,7 @@ pub use crate::{
 pub struct Parser {
     pub lines: Rc<Vec<String>>,
     pub tokens: Vec<Token>,
-    pub prog: ast::Block,
+    pub prog: Program,
     top: Rc<RefCell<Scope>>,
     idx: usize,
 }
@@ -24,11 +25,8 @@ pub struct Parser {
 // Parsing
 impl Parser {
     pub fn new(lines: Rc<Vec<String>>, tokens: &Vec<Token>) -> Parser {
-        let prog = ast::Block {
-            stmts: Vec::new(),
-            scope: Scope::new(None),
-        };
-        let top = Rc::clone(&prog.scope);
+        let prog = Program::new(Scope::new(None));
+        let top = Rc::clone(&prog.block.scope);
 
         Parser {
             lines,
@@ -103,7 +101,7 @@ impl Parser {
             }
 
             let stmt = self.parse_stmt();
-            self.prog.stmts.push(stmt);
+            self.prog.block.stmts.push(stmt);
         }
     }
 }

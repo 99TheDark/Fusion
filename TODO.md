@@ -1,5 +1,4 @@
 # TODO
-- Add table of functions (and eventually class + structs) in a `Program` struct
 - Custom number parser
 - Parse function calls
 - Check function calls

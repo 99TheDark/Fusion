@@ -4,6 +4,7 @@ pub mod error;
 pub mod lexer;
 pub mod location;
 pub mod parser;
+pub mod program;
 pub mod read;
 pub mod scope;
 pub mod tokens;
@@ -16,7 +17,7 @@ use lexer::{source_lines, Lexer};
 use parser::Parser;
 
 fn main() {
-    let code = Rc::new(read::read_file("code.txt"));
+    let code = Rc::new(read::read_file("code.fn"));
     let lines = source_lines(Rc::clone(&code));
 
     let mut lexer = Lexer::new(Rc::clone(&code));
@@ -30,5 +31,5 @@ fn main() {
     let mut checker = Checker::new(Rc::clone(&lines), parser.prog);
     checker.check();
 
-    checker.prog.print()
+    checker.prog.block.print();
 }
