@@ -17,6 +17,7 @@ impl Checker {
             Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
             Stmt::DoWhileLoop(ref mut x) => self.check_do_while_loop(x),
             Stmt::Continue => (),
+            Stmt::Func(ref mut x) => self.check_func(x),
             _ => self.panic(
                 "Invalid statement".to_owned(),
                 node,
@@ -104,5 +105,14 @@ impl Checker {
     pub(crate) fn check_do_while_loop(&mut self, do_while_loop: &mut ast::DoWhileLoop) {
         self.check_block(&mut do_while_loop.body.src);
         self.verify_cond(&mut do_while_loop.cond);
+    }
+
+    pub(crate) fn check_func(&mut self, func: &mut ast::Func) {
+        let _ret_typ = match func.ret {
+            Some(ref ret) => ret.typ.clone(),
+            None => None,
+        };
+
+        self.check_block(&mut func.body.src);
     }
 }

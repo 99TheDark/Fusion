@@ -1,13 +1,3 @@
-let x = 5
-let y = true
-if true {
-    let a = 4 + x
-    let x = true
-    if x | false {
-        let b = 3
-    }
-    let z = -2
+func add(x: int32, y: int32): int32 {
+    return x + y
 }
-
-x += 4
-x = 7
