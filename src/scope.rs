@@ -37,6 +37,17 @@ impl Scope {
         unsafe { VARIABLE_ID += 1 };
     }
 
+    pub fn param(&mut self, name: String, typ: DataType) {
+        self.varis.insert(
+            name,
+            Rc::new(RefCell::new(Variable {
+                id: unsafe { VARIABLE_ID.clone() },
+                typ: Some(typ),
+            })),
+        );
+        unsafe { VARIABLE_ID += 1 };
+    }
+
     pub fn set(&self, name: &String, typ: DataType) -> Option<ErrorCode> {
         match self.varis.get(name) {
             Some(val) => {

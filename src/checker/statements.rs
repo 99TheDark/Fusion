@@ -3,6 +3,7 @@ use std::rc::Rc;
 use crate::{
     ast::{self, Node, Stmt},
     error::ErrorCode,
+    types::DataType,
 };
 
 use super::Checker;
@@ -63,7 +64,11 @@ impl Checker {
         // Set type in scope
         let name = &decl.name.src.name;
         if let Some(err) = self.top.borrow_mut().set(&name, val) {
-            self.panic(format!("Variable {} does not exist", name), &decl.name, err);
+            self.panic(
+                format!("The variable '{}' does not exist", name),
+                &decl.name,
+                err,
+            );
         }
     }
 
@@ -89,7 +94,7 @@ impl Checker {
                 }
             }
             Err(err) => self.panic(
-                format!("Variable {} does not exist", name),
+                format!("The variable '{}' does not exist", name),
                 &assign.name,
                 err,
             ),
@@ -128,6 +133,12 @@ impl Checker {
             None => None,
         };
         self.fn_ret = ret_typ;
+
+        for param in &func.args {
+            let name = param.src.name.src.name.clone();
+            let typ = DataType::from(&param.src.annot.src.name).unwrap();
+            func.body.src.scope.borrow_mut().param(name, typ);
+        }
 
         self.check_block(&mut func.body.src);
 

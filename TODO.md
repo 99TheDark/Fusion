@@ -1,6 +1,4 @@
 # TODO
-- Include top function in top
-- Add function signatures to program
 - Custom number parser
 - Parse function calls
 - Check function calls

@@ -37,13 +37,13 @@ impl Checker {
             Ok(vari) => match vari.borrow().typ.as_ref() {
                 Some(val) => return val.clone(),
                 None => self.panic(
-                    format!("Variable {} does not exist", ident.name),
+                    format!("The variable '{}' does not exist", ident.name),
                     &node,
                     ErrorCode::VariableNotFound,
                 ),
             },
             Err(err) => self.panic(
-                format!("Variable {} does not exist", ident.name),
+                format!("The variable '{}' does not exist", ident.name),
                 &node,
                 err,
             ),

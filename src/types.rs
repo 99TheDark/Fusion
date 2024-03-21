@@ -8,6 +8,7 @@ pub enum DataType {
 }
 
 impl DataType {
+    // TODO: Fix to give a result so if they're too short they don't throw an out of bounds error
     pub fn from(src: &String) -> Option<DataType> {
         // There HAS to be a better way of doing this
         if let Some(x) = Int::from(&src) {
