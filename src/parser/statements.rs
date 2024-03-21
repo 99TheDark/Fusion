@@ -145,7 +145,7 @@ impl Parser {
         let name = self.parse_ident();
 
         self.expect(Type::LeftParen);
-        let args = self.parse_list(Parser::parse_param);
+        let params = self.parse_list(Parser::parse_param);
         self.expect(Type::RightParen);
 
         let ret = if self.tt() == Type::Colon {
@@ -160,7 +160,7 @@ impl Parser {
         self.node(
             Stmt::Func(ast::Func {
                 name,
-                args,
+                params,
                 ret,
                 body,
             }),

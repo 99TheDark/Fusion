@@ -51,7 +51,7 @@ pub struct DoWhileLoop {
 #[derive(Debug, Clone)]
 pub struct Func {
     pub name: Node<Ident>,
-    pub args: Vec<Node<Param>>,
+    pub params: Vec<Node<Param>>,
     pub ret: Option<Node<Ident>>,
     pub body: Node<Block>,
     // TODO: Add ID, like Expr::Ident

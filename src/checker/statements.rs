@@ -169,7 +169,7 @@ impl Checker {
         };
         self.fn_ret = ret_typ;
 
-        for param in &func.args {
+        for param in &func.params {
             let name = param.src.name.src.name.clone();
             let typ = DataType::from(&param.src.annot.src.name).unwrap();
             func.body.src.scope.borrow_mut().param(name, typ);
