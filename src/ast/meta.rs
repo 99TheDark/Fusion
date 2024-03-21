@@ -26,8 +26,8 @@ where
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{:#?}, {{ start: {}, end: {} }}",
-            self.src, self.start, self.end
+            "({:#?}) {:#?}, {{ start: {}, end: {} }}",
+            self.typ, self.src, self.start, self.end
         )
     }
 }

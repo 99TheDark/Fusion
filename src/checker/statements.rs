@@ -10,6 +10,7 @@ use super::Checker;
 
 impl Checker {
     pub(crate) fn check_stmt(&mut self, node: &mut Node<Stmt>) {
+        let copy = node.clone();
         match &mut node.src {
             Stmt::Block(ref mut x) => self.check_block(x),
             Stmt::Decl(ref mut x) => self.check_decl(x),
@@ -18,7 +19,7 @@ impl Checker {
             Stmt::WhileLoop(ref mut x) => self.check_while_loop(x),
             Stmt::DoWhileLoop(ref mut x) => self.check_do_while_loop(x),
             Stmt::Continue => (),
-            Stmt::Return(ref mut x) => self.check_return(x),
+            Stmt::Return(ref mut x) => self.check_return(copy, x),
             Stmt::Func(ref mut x) => self.check_func(x),
 
             // In case any other statements are added
@@ -116,20 +117,54 @@ impl Checker {
         self.verify_cond(&mut do_while_loop.cond);
     }
 
-    pub(crate) fn check_return(&mut self, ret: &mut ast::Return) {
+    pub(crate) fn check_return(&mut self, node: Node<Stmt>, ret: &mut ast::Return) {
         let val = match ret.val {
             Some(ref mut x) => Some(self.check_expr(x)),
             None => None,
         };
 
-        println!("{:#?}", val);
+        match (&val, &self.fn_ret) {
+            (Some(x), Some(y)) => {
+                if x != y {
+                    self.panic(
+                        format!(
+                            "Expected a return type of {}, but got type {} instead",
+                            x.to_string(),
+                            y.to_string(),
+                        ),
+                        &node,
+                        ErrorCode::TypeMismatch,
+                    );
+                }
+            }
+            (Some(x), None) => self.panic(
+                format!(
+                    "Expected no return type, but got type {} instead",
+                    x.to_string()
+                ),
+                &node,
+                ErrorCode::TypeMismatch,
+            ),
+            (None, Some(y)) => self.panic(
+                format!(
+                    "Expected a return type of {}, but got no type instead",
+                    y.to_string()
+                ),
+                &node,
+                ErrorCode::TypeMismatch,
+            ),
+            _ => (),
+        };
     }
 
     pub(crate) fn check_func(&mut self, func: &mut ast::Func) {
         let prev_ret = self.fn_ret.clone();
 
         let ret_typ = match func.ret {
-            Some(ref ret) => ret.typ.clone(),
+            Some(ref mut ret) => {
+                ret.typ = DataType::from(&ret.src.name);
+                ret.typ.clone()
+            }
             None => None,
         };
         self.fn_ret = ret_typ;
