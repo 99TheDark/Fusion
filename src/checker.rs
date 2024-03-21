@@ -8,19 +8,25 @@ use crate::{
     error::{Error, ErrorCode},
     program::Program,
     scope::Scope,
-    types,
+    types::{self, DataType},
 };
 
 pub struct Checker {
     pub lines: Rc<Vec<String>>,
     pub prog: Program,
     top: Rc<RefCell<Scope>>,
+    fn_ret: Option<DataType>,
 }
 
 impl Checker {
     pub fn new(lines: Rc<Vec<String>>, prog: Program) -> Checker {
         let top = Rc::clone(&prog.block.scope);
-        Checker { lines, prog, top }
+        Checker {
+            lines,
+            prog,
+            top,
+            fn_ret: None,
+        }
     }
 
     fn panic<T>(&self, message: String, node: &Meta<T>, id: ErrorCode) {
