@@ -6,7 +6,7 @@ use crate::{
 
 use super::Parser;
 
-impl Parser {
+impl<'a> Parser<'a> {
     pub(crate) fn parse_expr(&mut self) -> Node<Expr> {
         self.parse_binop(None)
     }

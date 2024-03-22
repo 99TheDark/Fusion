@@ -5,27 +5,27 @@ pub(crate) mod misc;
 pub(crate) mod raw;
 pub(crate) mod statements;
 
-use crate::program::Program;
 pub use crate::{
     ast::{self, Node},
     error::{Error, ErrorCode},
     location::Location,
+    program::Program,
     scope::Scope,
     tokens::{Token, Type},
 };
 
-pub struct Parser {
+pub struct Parser<'a> {
     pub lines: Rc<Vec<String>>,
     pub tokens: Vec<Token>,
-    pub prog: Program,
+    pub prog: &'a mut Program,
     top: Rc<RefCell<Scope>>,
     idx: usize,
 }
 
 // Parsing
-impl Parser {
+impl<'a> Parser<'a> {
     pub fn new(lines: Rc<Vec<String>>, tokens: &Vec<Token>) -> Parser {
-        let prog = Program::new(Scope::new(None));
+        let prog = &mut Program::new(Scope::new(None));
         let top = Rc::clone(&prog.block.scope);
 
         Parser {

@@ -11,15 +11,15 @@ use crate::{
     types::{self, DataType},
 };
 
-pub struct Checker {
+pub struct Checker<'a> {
     pub lines: Rc<Vec<String>>,
-    pub prog: Program,
+    pub prog: &'a mut Program,
     top: Rc<RefCell<Scope>>,
     fn_ret: Option<DataType>,
 }
 
-impl Checker {
-    pub fn new(lines: Rc<Vec<String>>, prog: Program) -> Checker {
+impl<'a> Checker<'a> {
+    pub fn new(lines: Rc<Vec<String>>, prog: &mut Program) -> Checker {
         let top = Rc::clone(&prog.block.scope);
         Checker {
             lines,
@@ -45,13 +45,9 @@ impl Checker {
     }
 
     pub fn check(&mut self) {
-        // Gotta figure out a better way of doing this
-        let mut prog = Program::new(Rc::clone(&self.prog.block.scope));
-        for stmt in &mut self.prog.block.stmts.clone().iter_mut() {
+        for stmt in &mut self.prog.block.stmts {
             self.check_stmt(stmt);
-            prog.block.stmts.push(stmt.clone());
+            self.prog.block.stmts.push(stmt.clone());
         }
-
-        self.prog = prog;
     }
 }

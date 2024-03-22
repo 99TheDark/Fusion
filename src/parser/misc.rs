@@ -8,7 +8,7 @@ use crate::{
 
 use super::Parser;
 
-impl Parser {
+impl<'a> Parser<'a> {
     pub(crate) fn parse_param(&mut self) -> Node<ast::Param> {
         let start = self.cur_loc();
 

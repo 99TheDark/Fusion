@@ -8,7 +8,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Program {
     pub block: Block,
-    pub funcs: Vec<Func>,
+    pub funcs: Vec<*const Func>,
 }
 
 impl Program {
@@ -20,5 +20,9 @@ impl Program {
             },
             funcs: Vec::new(),
         }
+    }
+
+    pub fn print(&self) {
+        println!("{}", format!("{:#?}", self).replace("  ", " "));
     }
 }

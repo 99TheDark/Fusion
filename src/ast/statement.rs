@@ -10,12 +10,6 @@ pub struct Block {
     pub scope: Rc<RefCell<Scope>>,
 }
 
-impl Block {
-    pub fn print(&self) {
-        println!("{}", format!("{:#?}", self).replace("  ", " "));
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct Decl {
     pub name: Node<Ident>,
