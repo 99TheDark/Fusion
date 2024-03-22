@@ -8,7 +8,7 @@ use crate::{
 
 use super::Checker;
 
-impl<'a> Checker<'a> {
+impl Checker {
     pub(crate) fn check_stmt(&mut self, node: &mut Node<Stmt>) {
         let copy = node.clone();
         match &mut node.src {

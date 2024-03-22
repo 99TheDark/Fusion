@@ -6,7 +6,7 @@ use crate::{
 
 use super::Checker;
 
-impl<'a> Checker<'a> {
+impl Checker {
     pub(crate) fn check_expr(&mut self, node: &mut Node<Expr>) -> DataType {
         let copy = node.clone();
         let typ = match &mut node.src {

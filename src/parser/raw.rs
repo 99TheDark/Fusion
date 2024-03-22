@@ -6,7 +6,7 @@ use crate::{
 
 use super::Parser;
 
-impl<'a> Parser<'a> {
+impl Parser {
     pub(crate) fn parse_raw_ident(&mut self) -> ast::Ident {
         let cur_tok = self.at();
         if cur_tok.typ.is(KEYWORDS) {

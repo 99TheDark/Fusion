@@ -6,7 +6,7 @@ use crate::{
 
 use super::Parser;
 
-impl<'a> Parser<'a> {
+impl Parser {
     pub(crate) fn parse_stmt(&mut self) -> Node<Stmt> {
         let tok = self.at();
         match tok.typ {
@@ -163,7 +163,6 @@ impl<'a> Parser<'a> {
             ret,
             body,
         };
-        self.prog.funcs.push(&func as *const ast::Func);
 
         self.node(Stmt::Func(func), start)
     }

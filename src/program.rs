@@ -8,7 +8,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Program {
     pub block: Block,
-    pub funcs: Vec<*const Func>,
+    pub funcs: Vec<Box<Func>>,
 }
 
 impl Program {

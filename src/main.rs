@@ -30,4 +30,6 @@ fn main() {
 
     let mut checker = Checker::new(Rc::clone(&lines), parser.prog);
     checker.check();
+
+    checker.prog.print();
 }

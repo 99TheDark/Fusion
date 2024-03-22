@@ -14,18 +14,18 @@ pub use crate::{
     tokens::{Token, Type},
 };
 
-pub struct Parser<'a> {
+pub struct Parser {
     pub lines: Rc<Vec<String>>,
     pub tokens: Vec<Token>,
-    pub prog: &'a mut Program,
+    pub prog: Program,
     top: Rc<RefCell<Scope>>,
     idx: usize,
 }
 
 // Parsing
-impl<'a> Parser<'a> {
+impl Parser {
     pub fn new(lines: Rc<Vec<String>>, tokens: &Vec<Token>) -> Parser {
-        let prog = &mut Program::new(Scope::new(None));
+        let prog = Program::new(Scope::new(None));
         let top = Rc::clone(&prog.block.scope);
 
         Parser {
